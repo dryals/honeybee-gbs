@@ -6,7 +6,7 @@
 #SBATCH --nodes=1 
 #SBATCH --ntasks=8
 #SBATCH --time=12:00:00
-#SBATCH --job-name mitotype
+#SBATCH --job-name demultiplex
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/demult.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/demult.out
 
@@ -31,7 +31,7 @@ process_shortreads \
 -o $CLUSTER_SCRATCH/gbs/bag13/samples \
 -inline_inline \
 -i gzfastq \
-y gzfastq \
+-y gzfastq \
 -q -c -r
 
 process_shortreads \
@@ -41,7 +41,7 @@ process_shortreads \
 -o $CLUSTER_SCRATCH/gbs/bag13/samples \
 -inline_inline \
 -i gzfastq \
-y gzfastq \
+-y gzfastq \
 -q -c -r
 
 
