@@ -25,7 +25,6 @@ conda activate ipyrad
 #     conda create -n ipyrad
 #     conda activate ipyrad
 #     conda install ipyrad -c conda-forge -c bioconda
-    conda activate ipyrad
     
 #initalize parameter file 
 # cd $CLUSTER_SCRATCH/gbs
