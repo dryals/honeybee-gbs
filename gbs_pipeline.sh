@@ -18,7 +18,7 @@ date
 
 #iPyrad
 
-module load anaconda
+module load anaconda use.own
 conda activate ipyrad
 
 #first-time activation
@@ -31,11 +31,15 @@ conda activate ipyrad
 # mkdir -p ipyrad
 # ipyrad -n test-gbs
 
+#run R to output barcodes
+    #...
+
 #copy over parameter file
 cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
 cd $CLUSTER_SCRATCH/gbs/ipyrad
 
-ipyrad -p params-test-gbs.txt -s 1
+echo "starting ipyrad..."
+    ipyrad -p params-test-gbs.txt -s 1
 
 
 ####
