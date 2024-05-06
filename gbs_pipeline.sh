@@ -33,7 +33,9 @@ module load anaconda
 
 #copy over parameter file
 cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
+cd $CLUSTER_SCRATCH/gbs/ipyrad
 
+ipyrad -p params-test-gbs.txt -s 1
 
 
 
