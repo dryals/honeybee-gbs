@@ -44,7 +44,7 @@ cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
     
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
-    ipyrad -p params-test-gbs.txt -s 1
+    ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d
 
 
 ####
