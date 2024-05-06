@@ -26,6 +26,14 @@ module load anaconda
 #     conda install ipyrad -c conda-forge -c bioconda
     conda activate ipyrad
     
+#initalize parameter file 
+# cd $CLUSTER_SCRATCH/gbs
+# mkdir -p ipyrad
+# ipyrad -n test-gbs
+
+#copy over parameter file
+cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
+
 
 
 
