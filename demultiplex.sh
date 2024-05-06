@@ -16,11 +16,16 @@
 
 date
 
-module load biocontainers bwa atram spades abyss velvet blast
+module load anaconda
 
 ####
 
+#install package:
+#     conda create -n gbs
+#     conda activate gbs
+#     conda install -c conda-forge -c bioconda ultraplex
 
+conda activate gbs
 
 
 
