@@ -21,29 +21,26 @@ date
 module load anaconda use.own
 conda activate ipyrad
 
-#first-time activation
+# #first-time activation
 #     conda create -n ipyrad
 #     conda activate ipyrad
 #     conda install ipyrad -c conda-forge -c bioconda
-    
-#initalize parameter file 
-# cd $CLUSTER_SCRATCH/gbs
-# mkdir -p ipyrad
-# ipyrad -n test-gbs
-
-#run R to output barcodes
-    #...
-
-#copy over parameter file
-cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
-
-#rename fastqs
+# 
+# #run R to output barcodes
+#     Rscript --vanilla --silent barcodes.R
+# 
+# #copy parameter file into scratch directory
+# cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
+# 
+# #rename fastqs: _R1_ and _R2_ required in filename
 #     cd $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1
 #     mv Bag13_p1_L1_1.fq.gz Bag13_p1_L1_R1_.fastq.gz
 #     mv Bag13_p1_L1_2.fq.gz Bag13_p1_L1_R2_.fastq.gz
-    
+#  
+
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
+    #first step: demultiplexing
     ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
 
 
