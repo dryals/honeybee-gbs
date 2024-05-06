@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --nodes=1 
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --time=12:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -19,6 +19,7 @@ date
 #iPyrad
 
 module load anaconda
+conda activate ipyrad
 
 #first-time activation
 #     conda create -n ipyrad
@@ -36,8 +37,6 @@ cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
 cd $CLUSTER_SCRATCH/gbs/ipyrad
 
 ipyrad -p params-test-gbs.txt -s 1
-
-
 
 
 ####
