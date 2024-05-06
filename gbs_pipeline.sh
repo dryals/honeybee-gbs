@@ -36,9 +36,14 @@ conda activate ipyrad
 
 #copy over parameter file
 cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
-cd $CLUSTER_SCRATCH/gbs/ipyrad
 
+#rename fastqs
+    cd $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1
+    mv Bag13_p1_L1_1.fq.gz Bag13_p1_L1_R1_.fastq.gz
+    mv Bag13_p1_L1_2.fq.gz Bag13_p1_L1_R2_.fastq.gz
+    
 echo "starting ipyrad..."
+    cd $CLUSTER_SCRATCH/gbs/ipyrad
     ipyrad -p params-test-gbs.txt -s 1
 
 

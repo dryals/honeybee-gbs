@@ -1,15 +1,15 @@
 ------- ipyrad params file (v.0.9.95)-------------------------------------------
 test-gbs                       ## [0] [assembly_name]: Assembly name. Used to name output directories for assembly steps
 /scratch/negishi/dryals/gbs/ipyrad ## [1] [project_dir]: Project dir (made in curdir if not present)
-/scratch/negishi/dryals/gbs/bag13/Bag13_p1/*fq.gz   ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
-/depot/bharpur/data/projects/ryals/honeybee-gbs/barcodes/P1barcodes.txt       ## [3] [barcodes_path]: Location of barcodes file
+/scratch/negishi/dryals/gbs/bag13/Bag13_p1/*fastq.gz   ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
+/depot/bharpur/data/projects/ryals/honeybee-gbs/barcodes/P1barcodes.txt  ## [3] [barcodes_path]: Location of barcodes file
                                ## [4] [sorted_fastq_path]: Location of demultiplexed/sorted fastq files
 reference                         ## [5] [assembly_method]: Assembly method (denovo, reference)
 /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna                               ## [6] [reference_sequence]: Location of reference sequence file
 pairgbs                            ## [7] [datatype]: Datatype (see docs): rad, gbs, ddrad, etc.
-AWTC,                         ## [8] [restriction_overhang]: Restriction overhang (cut1,) or (cut1, cut2)
-5                              ## [9] [max_low_qual_bases]: Max low quality base calls (Q<20) in a read
-33                             ## [10] [phred_Qscore_offset]: phred Q score offset (33 is default and very standard)
+AWTC,                    ## [8] [restriction_overhang]: Restriction overhang (cut1,) or (cut1, cut2)
+5                            ## [9] [max_low_qual_bases]: Max low quality base calls (Q<20) in a read
+33                       ## [10] [phred_Qscore_offset]: phred Q score offset (33 is default and very standard)
 6                              ## [11] [mindepth_statistical]: Min depth for statistical base calling
 6                              ## [12] [mindepth_majrule]: Min depth for majority-rule base calling
 10000                          ## [13] [maxdepth]: Max cluster depth within samples
