@@ -16,35 +16,33 @@
 
 date
 
-#module load anaconda
+#stacks?
 
-#install package:
-#     conda create -n gbs
-#     conda activate gbs
-#     conda install -c conda-forge -c bioconda ultraplex
+module load biocontainers stacks
 
-#     conda activate gbs
+#run r script ...
+    #TO DO
 
 
-module load anaconda r
-
-#prepare barcodes files
-    #run r script
-
-# ultraplex
-conda activate gbs
-
-ultraplex -i $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1/Bag13_p1_L1_1.fq.gz \
+process_shortreads \
+-1 $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1/Bag13_p1_L1_1.fq.gz \
+-2 $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1/Bag13_p1_L1_2.fq.gz \
 -b barcodes/P1barcodes.txt \
--d $CLUSTER_SCRATCH/gbs/bag13/samples \
--t $SLURM_NTASKS
-    
-    
-    
-# #stacks?
-# process_radtags -p $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1 \
-# -o $CLUSTER_SCRATCH/gbs/bag13/samples \
-# -b barcodes/P1barcodes.txt -r -c -q -i gzfastq
+-o $CLUSTER_SCRATCH/gbs/bag13/samples \
+-inline_inline \
+-i gzfastq \
+y gzfastq \
+-q -c -r
+
+process_shortreads \
+-1 $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1/Bag13_p1_L1_1.fq.gz \
+-2 $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1/Bag13_p1_L1_2.fq.gz \
+-b barcodes/P1barcodes.txt \
+-o $CLUSTER_SCRATCH/gbs/bag13/samples \
+-inline_inline \
+-i gzfastq \
+y gzfastq \
+-q -c -r
 
 
 ####
