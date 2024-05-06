@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --nodes=1 
-#SBATCH --ntasks=16
+#SBATCH --ntasks=32
 #SBATCH --time=12:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -44,7 +44,7 @@ cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
     
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
-    ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d
+    ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
 
 
 ####
