@@ -49,7 +49,7 @@ echo "starting ipyrad..."
         #this is pretty quick
         #read filter could be more stringent
     
-    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
+    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f --MPI
         #s3 requires more mem than 32 cores ... ?
         #still errors... proper map?
     
