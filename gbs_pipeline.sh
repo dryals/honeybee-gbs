@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --nodes=1 
-#SBATCH --ntasks=32
+#SBATCH --ntasks=64
 #SBATCH --time=12:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -42,8 +42,12 @@ echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
     #first step: demultiplexing
     #ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
-        #this takes around 1.5hr
-    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f
+        #this takes around 1.5hr for one lane of 96 samples with 32 cores
+        
+    #ipyrad -p params-test-gbs.txt -s 2 -c $SLURM_NTASKS -d -f
+    
+    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d -f
+        #s3 requires more than 32 cores ...
     
 
 
