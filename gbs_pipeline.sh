@@ -3,8 +3,7 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --nodes=1 
-#SBATCH --ntasks=64
+#SBATCH --mem=100G
 #SBATCH --time=12:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -17,6 +16,8 @@
 date
 
 #iPyrad
+
+#testing with one lane of 96 samples
 
 module load anaconda use.own
 conda activate ipyrad
@@ -42,12 +43,13 @@ echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
     #first step: demultiplexing
     #ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
-        #this takes around 1.5hr for one lane of 96 samples with 32 cores
+        #this takes around 1.5hr with 32 cores
         
     #ipyrad -p params-test-gbs.txt -s 2 -c $SLURM_NTASKS -d -f
+        #this is pretty quick
     
-    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d -f
-        #s3 requires more than 32 cores ...
+    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
+        #s3 requires more mem than 32 cores ... ?
     
 
 
