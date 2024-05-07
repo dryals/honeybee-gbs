@@ -41,7 +41,10 @@ conda activate ipyrad
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
     #first step: demultiplexing
-    ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
+    #ipyrad -p params-test-gbs.txt -s 1 -c $SLURM_NTASKS -d -f
+        #this takes around 1.5hr
+    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f
+    
 
 
 ####
