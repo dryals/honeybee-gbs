@@ -3,7 +3,7 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
+#SBATCH --ntasks=24
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
@@ -49,7 +49,7 @@ echo "starting ipyrad..."
         #this is pretty quick
         #read filter could be more stringent
     
-    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d --MPI
+    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f --MPI
         #s3 runs with 16 tasks and 6GB mem per task
         # takes more than 12 hrs
         # this will be faster with stricter filtering on step 2
