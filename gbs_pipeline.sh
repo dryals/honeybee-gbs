@@ -31,7 +31,7 @@ conda activate ipyrad
 #     Rscript --vanilla --silent barcodes.R
 # 
 # #copy parameter file into scratch directory
-# cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
+cp params-test-gbs.txt $CLUSTER_SCRATCH/gbs/ipyrad
 # 
 # #rename fastqs: _R1_ and _R2_ required in filename!!!
 #     cd $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1

@@ -20,7 +20,7 @@ AWTC,                    ## [8] [restriction_overhang]: Restriction overhang (cu
 2                              ## [18] [max_alleles_consens]: Max alleles per site in consensus sequences
 0.05                           ## [19] [max_Ns_consens]: Max N's (uncalled bases) in consensus
 0.05                           ## [20] [max_Hs_consens]: Max Hs (heterozygotes) in consensus
-4                              ## [21] [min_samples_locus]: Min # samples per locus for output
+40                             ## [21] [min_samples_locus]: Min # samples per locus for output
 0.2                            ## [22] [max_SNPs_locus]: Max # SNPs per locus
 8                              ## [23] [max_Indels_locus]: Max # of indels per locus
 0.5                            ## [24] [max_shared_Hs_locus]: Max # heterozygous sites per locus
