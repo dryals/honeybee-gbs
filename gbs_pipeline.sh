@@ -49,7 +49,7 @@ echo "starting ipyrad..."
         #this is pretty quick
         #read filter could be more stringent
     
-    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f --MPI
+    #ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
         #s3 runs with 6GB mem per task
         #takes ??hrs on 24 cores
             #"building clusters" hangs at 0% for a while then jumps
@@ -59,11 +59,16 @@ echo "starting ipyrad..."
             #phred qscore 33 > 43
             #more trimming of sequences
             #pooling samples???
+            
+    ipyrad -p params-test-gbs.txt -s 4 -c $SLURM_NTASKS -d -f --MPI
 
 
 ####
 echo "DONE"
 date
+
+
+
 
 
 

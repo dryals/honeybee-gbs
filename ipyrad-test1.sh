@@ -34,9 +34,7 @@ conda activate ipyrad
 cp params-1test.txt $CLUSTER_SCRATCH/gbs/ipyrad
 
 #barcodes
-cd barcodes
-
-
+ #...
 
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
