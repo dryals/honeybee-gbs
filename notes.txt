@@ -1,0 +1,45 @@
+All hands meeting 5/8/24
+
+tassel wont work since paired-end
+
+stacks -> gatk
+- more snps than tassel
+
+rest of the bees
+- depth vs coverage? I think we want more depth 
+- 
+
+gatk
+- known sites list (we have)
+- imputation on all known hb sequences
+- compare against ipyrad
+
+only sequence 8 bees per colony for CBH data
+
+A-lin chromosome segments
+- disequilibrium across large parts of chromosome
+- adjacent snps make a chromosomal segment 
+- wallberg paper easy to distinguish A-lin segments
+- or ANCESTRY_HMM
+    - distr of haplotypes: describe "american" honeybees at level of haplotype 
+    - 
+
+- snps that differentiate carnica from liguistica?
+    - lots of carnica in the US instead of liguistica
+    - how best to find carnica and ligustica 
+    - hap
+    
+- Min will share more on library prep protocol
+
+- metadata issue: make sure GBS connects directly to Gencove data
+    - organize the other metadata
+    
+- update priority sheet with everything sent to UGA
+    - CBH samples priority
+    
+- Seven needs dissertation material: GWAS
+
+- Environmnetal component: lat and lon
+    - metadata needs a lot of cleanup! 
+    - have Amos turn all addresses to gps and standardize gps format?
+    - 
