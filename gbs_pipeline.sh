@@ -3,9 +3,9 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
+#SBATCH --ntasks=20
 #SBATCH --mem-per-cpu=6G
-#SBATCH --time=12:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -49,9 +49,11 @@ echo "starting ipyrad..."
         #this is pretty quick
         #read filter could be more stringent
     
-    ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f --MPI
-        #s3 requires more mem than 32 cores ... ?
-        #still errors... proper map?
+    ipyrad -p params-test-gbs.txt -s 3 -c $SLURM_NTASKS -d --MPI
+        #s3 runs with 16 tasks and 6GB mem per task
+        # takes more than 12 hrs
+        # this will be faster with stricter filtering on step 2
+            #consider trimming read length, “filter_adapters” = 2
     
 
 
