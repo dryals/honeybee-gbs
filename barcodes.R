@@ -15,3 +15,8 @@ write.table(bc.unique %>% filter(GBS_Plate == 1) %>% select(FullSampleName, Barc
 write.table(bc.unique %>% filter(GBS_Plate == 2) %>% select(FullSampleName, Barcode),
             file = "barcodes/P2barcodes.txt",
             row.names = F, col.names = F, quote = F, sep = "\t")
+
+#second version of barcodes
+write.table(bc %>% filter(GBS_Plate == 1) %>% select(FullSampleName, Barcode),
+            file = "barcodes/P1barcodes2.txt",
+            row.names = F, col.names = F, quote = F, sep = "\t")

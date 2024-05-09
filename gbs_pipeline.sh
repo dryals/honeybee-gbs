@@ -50,11 +50,15 @@ echo "starting ipyrad..."
         #read filter could be more stringent
     
     ipyrad -p params-test-gbs.txt -s 23 -c $SLURM_NTASKS -d -f --MPI
-        #s3 runs with 16 tasks and 6GB mem per task
-        # takes more than 12 hrs
-        # this will be faster with stricter filtering on step 2
-            #consider trimming read length, “filter_adapters” = 2
-    
+        #s3 runs with 6GB mem per task
+        #takes ??hrs on 24 cores
+            #"building clusters" hangs at 0% for a while then jumps
+        #try
+            #more mem
+            #more cores
+            #phred qscore 33 > 43
+            #more trimming of sequences
+            #pooling samples???
 
 
 ####
