@@ -55,16 +55,19 @@ echo "starting ipyrad..."
             #"building clusters" hangs at 0% for a while then jumps
 
     #s4 takes 7 min
+    #s56 takes ~3hrs
             
-    ipyrad -p params-test-gbs.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
+    #ipyrad -p params-test-gbs.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
     
     #some steps are memory limited (3) while others are not (1,2,4...?)
         #may need a better way of managing jobs to optimize ... 
         
 
     #split to remove dead samp  
-    ipyrad -p params-data1 -b test-branch - 23-II18w09
-
+    #ipyrad -p params-test-gbs.txt -b test-branch - 23-II18w09
+    
+    
+    ipyrad -p params-test-branch.txt -s 7 -c $SLURM_NTASKS -d -f
 
 ####
 echo "DONE"
