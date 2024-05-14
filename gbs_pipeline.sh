@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=16
-#SBATCH --mem-per-cpu=10G
+#SBATCH --mem-per-cpu=9G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
