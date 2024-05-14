@@ -3,8 +3,8 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=24
-#SBATCH --mem-per-cpu=9G
+#SBATCH --ntasks=12
+#SBATCH --mem-per-cpu=10G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -68,7 +68,10 @@ echo "starting ipyrad..."
     
     
     ipyrad -p params-test-branch.txt -s 7 -c $SLURM_NTASKS -d -f
-        #s7 needs 10GB per core?!
+        #s7 needs 9GB per core?!
+        #perhaps the amount of mem required also depends on how many tasks:
+            #fewer tasks means more load per task...?
+            #12 cores 10GB
 
 ####
 echo "DONE"
