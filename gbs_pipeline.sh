@@ -3,8 +3,8 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
-#SBATCH --mem-per-cpu=6G
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=8G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -55,7 +55,7 @@ echo "starting ipyrad..."
             #"building clusters" hangs at 0% for a while then jumps
 
     #s4 takes 7 min
-    #s56 takes ~3hrs
+    #s56 takes ~3hrs with 24 cores
             
     #ipyrad -p params-test-gbs.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
     
