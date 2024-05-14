@@ -3,7 +3,7 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
+#SBATCH --ntasks=24
 #SBATCH --mem-per-cpu=9G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
