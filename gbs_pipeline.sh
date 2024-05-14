@@ -3,8 +3,8 @@
 # FILENAME: gbs_pipeline.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
-#SBATCH --mem-per-cpu=8G
+#SBATCH --ntasks=12
+#SBATCH --mem-per-cpu=10G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -68,6 +68,7 @@ echo "starting ipyrad..."
     
     
     ipyrad -p params-test-branch.txt -s 7 -c $SLURM_NTASKS -d -f
+        #s7 needs 10GB per core?!
 
 ####
 echo "DONE"
