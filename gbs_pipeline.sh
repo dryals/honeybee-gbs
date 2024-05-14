@@ -71,7 +71,7 @@ echo "starting ipyrad..."
         #s7 needs 9GB per core?!
         #perhaps the amount of mem required also depends on how many tasks:
             #fewer tasks means more load per task...?
-            #12 cores 10GB
+            #12 cores 10GB ... seems to like a nice balance
 
 ####
 echo "DONE"
