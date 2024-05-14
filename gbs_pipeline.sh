@@ -57,6 +57,13 @@ echo "starting ipyrad..."
     #s4 takes 7 min
             
     ipyrad -p params-test-gbs.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
+    
+    #some steps are memory limited (3) while others are not (1,2,4...?)
+        #may need a better way of managing jobs to optimize ... 
+        
+
+    #split to remove dead samp  
+    ipyrad -p params-data1 -b test-branch - 23-II18w09
 
 
 ####
