@@ -36,9 +36,9 @@ module load biocontainers vcftools bcftools plink anaconda
     conda activate ipyrad 
     bgzip test-sorted.vcf
     
-    bcftools index -c test-sorted.vcf.gz &
+    bcftools index -c test-sorted.vcf.gz 
     bcftools annotate test-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o test.bcf.gz
-    bcftools index -c test.bcf.gz &
+    bcftools index -c test.bcf.gz 
     
 #filter the input
     bcftools view test.bcf.gz -q 0.05:minor -e 'F_MISSING>0.1' --threads $SLURM_NTASKS -Ob -o test-filter.bcf.gz
@@ -60,7 +60,8 @@ module load biocontainers vcftools bcftools plink anaconda
     
     bcftools index -c admix.bcf.gz
 
-#find AIMs??? or nah???
+#find AIMs
+    #get popfrq
     mkdir -p aim
     cd aim
     for pop in A C M O
@@ -72,22 +73,32 @@ module load biocontainers vcftools bcftools plink anaconda
 
     paste A.frq C.tmp M.tmp O.tmp > ref.popfrq
     rm *.tmp *.frq
-
-
-
     
+    #calc AIM
+    R --vanilla --no-save --no-echo --silent < ~/ryals/honeybee-gbs/aimIa_v2.R
+    
+    #format
+    sort -k3 -gr test.ia > test-sorted.ia
+    awk 'OFS=":" {print$1, $2}' test-sorted.ia | head -n 5000 > plink_aim.txt
+    
+
 #plink
-    plink --bcf admix.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --threads $SLURM_NTASKS --silent --out admix
+    cd ..
     
-        cd /home/dryals/ryals/honeybee-gbs
-        #create pop file
-        R --vanilla --no-save --no-echo --silent < makeAdmixPop.R
-        
+    #sanitize variant ids 
+    bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
+    
+    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --threads $SLURM_NTASKS --silent --out admix
+    
 #run admixture
-    cd $CLUSTER_SCRATCH/gbs/analysis
+    #create pop file
+    cd ~/ryals/honeybee-gbs/
+    R --vanilla --no-save --no-echo --silent < makeAdmixPop.R
+    sleep 3
+    cd -
+    
     ADMIX=/depot/bharpur/apps/admixture/admixture
-    #remember to change this for the correct k value!!
-    $ADMIX admix.bed 4 -j4 --cv=20 --supervised > admix.out
+    $ADMIX admix.bed 4 -j${SLURM_NTASKS} --cv=20 --supervised > admix.out
         
 #run NGSremix
     #this takes a hot minute

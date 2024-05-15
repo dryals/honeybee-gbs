@@ -31,6 +31,8 @@ conda activate ipyrad
 # #copy parameter file into scratch directory
 cp params-bag13p1.txt $CLUSTER_SCRATCH/gbs/ipyrad
 cp params-bag13p2.txt $CLUSTER_SCRATCH/gbs/ipyrad
+
+cp params-bag13.txt $CLUSTER_SCRATCH/gbs/ipyrad
 # 
 # #rename fastqs: _R1_ and _R2_ required in filename!!!
 #     cd $CLUSTER_SCRATCH/gbs/bag13/Bag13_p1
@@ -44,12 +46,19 @@ cp params-bag13p2.txt $CLUSTER_SCRATCH/gbs/ipyrad
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/ipyrad
     #first step: demultiplexing
-    ipyrad -p params-bag13p1.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
-    ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+#     ipyrad -p params-bag13p1.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+#     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+#     
+#     #move all sorted files into a new directory
+#     cd $CLUSTER_SCRATCH/gbs/ipyrad
+#     mkdir -p bag13_fastqs
+#     mv bag13p1_fastqs/*fastq.gz bag13_fastqs
+#     mv bag13p2_fastqs/*fastq.gz bag13_fastqs
+
+    #attempt the rest of the steps
+    ipyrad -p params-bag13.txt -s 234567 -c $SLURM_NTASKS -d -f --MPI
     
-    #move all sorted files into a new directory
-    #...
-   
+    
 
 ####
 echo "DONE"
