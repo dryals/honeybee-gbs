@@ -3,8 +3,8 @@
 # FILENAME: test_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=12
-#SBATCH --mem-per-cpu=10G
+#SBATCH --ntasks=6
+#SBATCH --mem-per-cpu=2G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/test.out
@@ -19,8 +19,9 @@ date
 
 #testing with one lane of 96 samples
 
-module load anaconda use.own
-conda activate ipyrad
+#module load anaconda use.own
+module load vcftools
+#conda activate ipyrad
 
 # #first-time activation
 #     conda create -n ipyrad
@@ -67,14 +68,17 @@ echo "starting ipyrad..."
     #ipyrad -p params-test-gbs.txt -b test-branch - 23-II18w09
     
     
-    ipyrad -p params-test-branch.txt -s 7 -c $SLURM_NTASKS -d -f
+    #ipyrad -p params-test-branch.txt -s 7 -c $SLURM_NTASKS -d -f
         #s7 needs 9GB per core?!
         #perhaps the amount of mem required also depends on how many tasks:
             #fewer tasks means more load per task...?
             #12 cores 10GB ... seems to like a nice balance
             
             
-            #vcftools --vcf test-branch.vcf --het --out test-branch
+    #relatedness
+        cd test-branch_outfiles
+        #vcftools --vcf test-branch.vcf --het --out test-branch
+        vcftools --vcf test-branch.vcf --relatedness --out test
 
 ####
 echo "DONE"
