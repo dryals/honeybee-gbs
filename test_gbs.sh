@@ -6,7 +6,7 @@
 #SBATCH --ntasks=6
 #SBATCH --mem-per-cpu=1G
 #SBATCH --time=1-00:00:00
-#SBATCH --job-name gbs_pipeline
+#SBATCH --job-name test_gbs
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/test.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/test.out
 
