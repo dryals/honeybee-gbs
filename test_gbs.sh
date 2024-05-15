@@ -20,7 +20,7 @@ date
 #testing with one lane of 96 samples
 
 #module load anaconda use.own
-module load vcftools
+module load bioinfo vcftools
 #conda activate ipyrad
 
 # #first-time activation
