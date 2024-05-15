@@ -32,20 +32,20 @@ module load biocontainers vcftools bcftools plink anaconda
     bcftools sort test-branch.vcf.gz -Ob -o test.bcf.gz
     
 #sort the input
-#     cat test-branch.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > test-sorted.vcf
-#     conda activate ipyrad 
-#     bgzip test-sorted.vcf
-#     
-#     bcftools index -c test-sorted.vcf.gz &
-#     bcftools annotate test-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o test.bcf.gz
-#     bcftools index -c test.bcf.gz &
+    cat test-branch.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > test-sorted.vcf
+    conda activate ipyrad 
+    bgzip test-sorted.vcf
+    
+    bcftools index -c test-sorted.vcf.gz &
+    bcftools annotate test-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o test.bcf.gz
+    bcftools index -c test.bcf.gz &
     
 #filter the input
     bcftools view test.bcf.gz -q 0.05:minor -e 'F_MISSING>0.1' --threads $SLURM_NTASKS -Ob -o test-filter.bcf.gz
     bcftools index -c test-filter.bcf.gz
 
 #grab reference file 
-#     bcftools index -c reference.bcf.gz
+    bcftools index -c reference.bcf.gz
 
 
 #merge in the references
@@ -61,15 +61,41 @@ module load biocontainers vcftools bcftools plink anaconda
     bcftools index -c admix.bcf.gz
 
 #find AIMs??? or nah???
+    mkdir -p aim
+    cd aim
+    for pop in A C M O
+    do
+        bcftools view ../reference-filter.bcf.gz -S ~/ryals/admixPipeline/references/${pop}.txt -Ou | bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o ${pop}.frq
+        
+        awk '{print $3}' ${pop}.frq > ${pop}.tmp
+    done
+
+    paste A.frq C.tmp M.tmp O.tmp > ref.popfrq
+    rm *.tmp *.frq
+
+
+
     
 #plink
     plink --bcf admix.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --threads $SLURM_NTASKS --silent --out admix
     
-        cd /home/dryals/ryals/admixPipeline
+        cd /home/dryals/ryals/honeybee-gbs
         #create pop file
         R --vanilla --no-save --no-echo --silent < makeAdmixPop.R
-        sleep 5
-        sbatch supervised_admix_v3.sh
+        
+#run admixture
+    cd $CLUSTER_SCRATCH/gbs/analysis
+    ADMIX=/depot/bharpur/apps/admixture/admixture
+    #remember to change this for the correct k value!!
+    $ADMIX admix.bed 4 -j4 --cv=20 --supervised > admix.out
+        
+#run NGSremix
+    #this takes a hot minute
+    NGSremix=/depot/bharpur/apps/NGSremix/src/NGSremix
+    #make sure to edit 'select' to remove the references... this can be done programmatically
+    $NGSremix -plink admix -f admix.4.P -q admix.4.Q -P 1 -o test.rel -select 75-169
+    
+
     
     
 
