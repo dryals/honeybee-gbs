@@ -7,7 +7,7 @@ setwd("/depot/bharpur/data/projects/ryals/admixPipeline/references")
 popN = read.delim("refN.txt", header = F)
 
 #read freqs for chr
-setwd("/scratch/negishi/dryals/gbs/aim")
+setwd("/scratch/negishi/dryals/gbs/analysis/aim")
 
 freqs0 = read.delim("ref.popfrq", sep = "", header = F)
 
