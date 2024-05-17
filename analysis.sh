@@ -40,9 +40,15 @@ module load biocontainers vcftools bcftools plink anaconda
     bcftools annotate test-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o test.bcf.gz
     bcftools index -c test.bcf.gz 
     
+    
 #filter the input
     bcftools view test.bcf.gz -q 0.05:minor -e 'F_MISSING>0.1' --threads $SLURM_NTASKS -Ob -o test-filter.bcf.gz
     bcftools index -c test-filter.bcf.gz
+    
+    #depth and coverage stats
+    bcftools query -l test-filter.bcf.gz > test-filter.names
+    bcftools query -f'%CHROM\t%POS\t%DP\n' test-filter.bcf.gz > test-filter.depth
+    #rscript ...
 
 #grab reference file 
     bcftools index -c reference.bcf.gz

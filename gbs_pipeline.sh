@@ -5,7 +5,7 @@
 #SBATCH -A bharpur
 #SBATCH --ntasks=20
 #SBATCH --mem-per-cpu=10G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=1-08:00:00
 #SBATCH --job-name gbs_pipeline
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/pipeline.out
@@ -43,7 +43,7 @@ cp params-bag13p2.txt $CLUSTER_SCRATCH/gbs/ipyrad
 
 
 echo "starting ipyrad..."
-#     cd $CLUSTER_SCRATCH/gbs/ipyrad
+    cd $CLUSTER_SCRATCH/gbs/ipyrad
 #     #first step: demultiplexing
 #     ipyrad -p params-bag13p1.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
 #     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
