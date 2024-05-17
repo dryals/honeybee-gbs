@@ -21,6 +21,15 @@ date
 module load biocontainers vcftools bcftools plink anaconda
 
 
+# %coverage ???
+    #23-T3w04-mapped-sorted.bam as an example file
+    cd $CLUSTER_SCRATCH/gbs/ipyrad/test-gbs_refmapping
+    samtools depth -a 23-II42w06-mapped-sorted.bam > ../../analysis/II42w06.depth
+    
+    cd $CLUSTER_SCRATCH/gbs/analysis
+    
+    echo "$( grep -Pc "\t0" II42w06.depth ) / $( wc -l II42w06.depth | awk '{print $1}')" | bc -l
+    
 
 #format and fix the input file
     #set some global variables 
@@ -114,8 +123,17 @@ module load biocontainers vcftools bcftools plink anaconda
     
 
     
+#### additional analysis ###
+    
+#LD decay on Indiana honeybees 
+    #bell
+    cd $CLUSTER_SCRATCH/gbs/analysis
     
 
+plink --bcf $CLUSTER_SCRATCH/pipeline/allsamp.filter.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --keep ~/ryals/honeybee-gbs/data/plink_indy.txt --thin 0.1 --r2 gz --ld-window 100 --ld-window-kb 2000 --ld-window-r2 0 --silent --threads $SLURM_NTASKS --out indy2 &
+
+    #Rscript...
+        
 
 
 ####

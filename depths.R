@@ -30,6 +30,7 @@ sample.depth = depths.chrs %>% group_by(name) %>%
 
 sum(sample.depth$mean_depth > 14) / nrow(sample.depth)
 
+mean(sample.depth$mean_depth)
 
 sample.depth %>%
   arrange(desc(mean_depth)) %>% slice(c(1:3, (nsamp -2) : nsamp)) %>%
