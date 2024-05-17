@@ -43,15 +43,19 @@ cp params-bag13p2.txt $CLUSTER_SCRATCH/gbs/ipyrad
 
 
 echo "starting ipyrad..."
-    cd $CLUSTER_SCRATCH/gbs/ipyrad
-    #first step: demultiplexing
-    ipyrad -p params-bag13p1.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
-    ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
-    
-    ipyrad -m bag13 params-bag13p1.txt params-bag13p2.txt
+#     cd $CLUSTER_SCRATCH/gbs/ipyrad
+#     #first step: demultiplexing
+#     ipyrad -p params-bag13p1.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+#     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+#     
+#     ipyrad -m bag13 params-bag13p1.txt params-bag13p2.txt
+# 
+#     #attempt the rest of the steps
+#     ipyrad -p params-bag13.txt -s 234567 -c $SLURM_NTASKS -d -f --MPI
+    ipyrad -p params-bag13.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
 
-    #attempt the rest of the steps
-    ipyrad -p params-bag13.txt -s 234567 -c $SLURM_NTASKS -d -f --MPI
+    
+        #with 20 tasks and 10GB per, this takes 24hrs to get to finish step 4 ...
     
 ####
 echo "DONE"
