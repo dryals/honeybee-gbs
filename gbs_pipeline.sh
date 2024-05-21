@@ -16,6 +16,7 @@
 date
 
 #iPyrad
+#this takes around 30 hours on 120 cores...
 
 module load anaconda use.own
 conda activate ipyrad
@@ -52,14 +53,13 @@ echo "starting ipyrad..."
 # 
 #     #attempt the rest of the steps
 #     ipyrad -p params-bag13.txt -s 234567 -c $SLURM_NTASKS -d -f --MPI
-#     ipyrad -p params-bag13.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
     
+    #drop samples that failed to assemble
     ipyrad -p params-bag13.txt -b bag13-final - 23-II18w09
     
+    #output final results
     ipyrad -p params-bag13-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 
-    
-        #with 20 tasks and 10GB per, this takes 24hrs to get to finish step 4 ...
     
 ####
 echo "DONE"
