@@ -18,7 +18,7 @@ date
 
 #testing with one lane of 96 samples
 
-module load biocontainers vcftools bcftools plink anaconda
+module load biocontainers vcftools bcftools plink anaconda r
 
 
 # %coverage ???
@@ -104,8 +104,8 @@ module load biocontainers vcftools bcftools plink anaconda
     cd $CLUSTER_SCRATCH/gbs/analysis/aim
     
     #format
-    sort -k3 -gr aim/test.ia > test-sorted.ia
-    awk 'OFS=":" {print$1, $2}' test-sorted.ia | head -n 5000 > plink_aim.txt
+    sort -k3 -gr bag13.ia > bag13-sorted.ia
+    awk 'OFS=":" {print$1, $2}' bag13-sorted.ia | head -n 5000 > plink_aim.txt
     
 
 #plink
@@ -115,7 +115,7 @@ echo "running plink..."
     #sanitize variant ids 
     bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
     
-    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --threads $SLURM_NTASKS --silent --out admix
+    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --thin-bp 10000 --threads $SLURM_NTASKS --silent --out admix
     
 echo "estimating admixture"
 #run admixture
