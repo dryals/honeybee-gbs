@@ -43,7 +43,7 @@ module load biocontainers vcftools bcftools plink anaconda
 #     
      cd $CLUSTER_SCRATCH/gbs/analysis
    
-echo "sorting input..."
+# echo "sorting input..."
 #sort the input
 #     cat bag13-final.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > bag13-sorted.vcf
 #     conda activate ipyrad 
@@ -51,51 +51,51 @@ echo "sorting input..."
 #     conda deactivate
     
 #     bcftools index -c bag13-sorted.vcf.gz 
-    bcftools annotate bag13-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o bag13.bcf.gz
-    bcftools index -c bag13.bcf.gz 
-    
-    
-echo "filtering input..."
-#filter the input
-    bcftools view bag13.bcf.gz -q 0.01:minor -e 'F_MISSING>0.05' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
-    bcftools index -c bag13-filter.bcf.gz
-    
-    #depth and coverage stats
-    bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
-    bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
-    #rscript ...
-
-#grab reference file 
-#     bcftools index -c reference.bcf.gz
-
-
-echo "merging with reference..."
-#merge in the references
-    #save vcf sites
-    bcftools query bag13-filter.bcf.gz -f'%CHROM\t%POS\n' -o gbs.sites
-    #filter 
-    bcftools view reference.bcf.gz -T gbs.sites --threads $SLURM_NTASKS -Ob -o reference-filter.bcf.gz
-        #index
-        bcftools index -c reference-filter.bcf.gz
-    #merge
-    bcftools merge reference-filter.bcf.gz bag13-filter.bcf.gz -m snps -Ou | bcftools norm -m +snps -Ou | bcftools view -M2 -m2 --threads $SLURM_NTASKS -Ob -o admix.bcf.gz
-    
-    bcftools index -c admix.bcf.gz
-
-echo "finding AIMs..."
-#find AIMs
-    #get popfrq
-    mkdir -p aim
-    cd aim
-    for pop in A C M O
-    do
-        bcftools view ../reference-filter.bcf.gz -S ~/ryals/admixPipeline/references/${pop}.txt -Ou | bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o ${pop}.frq
-        
-        awk '{print $3}' ${pop}.frq > ${pop}.tmp
-    done
-
-    paste A.frq C.tmp M.tmp O.tmp > ref.popfrq
-    rm *.tmp *.frq
+#     bcftools annotate bag13-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o bag13.bcf.gz
+#     bcftools index -c bag13.bcf.gz 
+#     
+#     
+# echo "filtering input..."
+# #filter the input
+#     bcftools view bag13.bcf.gz -q 0.01:minor -e 'F_MISSING>0.05' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
+#     bcftools index -c bag13-filter.bcf.gz
+#     
+#     #depth and coverage stats
+#     bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
+#     bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
+#     #rscript ...
+# 
+# #grab reference file 
+# #     bcftools index -c reference.bcf.gz
+# 
+# 
+# echo "merging with reference..."
+# #merge in the references
+#     #save vcf sites
+#     bcftools query bag13-filter.bcf.gz -f'%CHROM\t%POS\n' -o gbs.sites
+#     #filter 
+#     bcftools view reference.bcf.gz -T gbs.sites --threads $SLURM_NTASKS -Ob -o reference-filter.bcf.gz
+#         #index
+#         bcftools index -c reference-filter.bcf.gz
+#     #merge
+#     bcftools merge reference-filter.bcf.gz bag13-filter.bcf.gz -m snps -Ou | bcftools norm -m +snps -Ou | bcftools view -M2 -m2 --threads $SLURM_NTASKS -Ob -o admix.bcf.gz
+#     
+#     bcftools index -c admix.bcf.gz
+# 
+# echo "finding AIMs..."
+# #find AIMs
+#     #get popfrq
+#     mkdir -p aim
+#     cd aim
+#     for pop in A C M O
+#     do
+#         bcftools view ../reference-filter.bcf.gz -S ~/ryals/admixPipeline/references/${pop}.txt -Ou | bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o ${pop}.frq
+#         
+#         awk '{print $3}' ${pop}.frq > ${pop}.tmp
+#     done
+# 
+#     paste A.frq C.tmp M.tmp O.tmp > ref.popfrq
+#     rm *.tmp *.frq
     
     #calc AIM
     cd ~/ryals/honeybee-gbs
