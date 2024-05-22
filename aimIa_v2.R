@@ -76,6 +76,6 @@ Ia = apply(freqs, 1, function(L){
 out = cbind(freqs[1:2], Ia)
 
 #write
-write.table(out, file = "test.ia", row.names = F, quote = F)
+write.table(out, file = "bag13.ia", row.names = F, quote = F)
 
 print("done")

@@ -98,10 +98,13 @@ echo "finding AIMs..."
     rm *.tmp *.frq
     
     #calc AIM
-    R --vanilla --no-save --no-echo --silent < ~/ryals/honeybee-gbs/aimIa_v2.R
+    cd ~/ryals/honeybee-gbs
+    R --vanilla --no-save --no-echo --silent < aimIa_v2.R
+    
+    cd $CLUSTER_SCRATCH/gbs/analysis/aim
     
     #format
-    sort -k3 -gr test.ia > test-sorted.ia
+    sort -k3 -gr aim/test.ia > test-sorted.ia
     awk 'OFS=":" {print$1, $2}' test-sorted.ia | head -n 5000 > plink_aim.txt
     
 
