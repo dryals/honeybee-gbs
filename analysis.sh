@@ -96,26 +96,25 @@ module load biocontainers vcftools bcftools plink anaconda r
 # 
 #     paste A.frq C.tmp M.tmp O.tmp > ref.popfrq
 #     rm *.tmp *.frq
-    
-    #calc AIM
-    cd ~/ryals/honeybee-gbs
-    R --vanilla --no-save --no-echo --silent < aimIa_v2.R
-    
-    cd $CLUSTER_SCRATCH/gbs/analysis/aim
-    
-    #format
-    sort -k3 -gr bag13.ia > bag13-sorted.ia
-    awk 'OFS=":" {print$1, $2}' bag13-sorted.ia | head -n 5000 > plink_aim.txt
-    
-
-#plink
+#     
+#     #calc AIM
+#     cd ~/ryals/honeybee-gbs
+#     R --vanilla --no-save --no-echo --silent < aimIa_v2.R
+#     
+#     cd $CLUSTER_SCRATCH/gbs/analysis/aim
+#     
+#     #format
+#     sort -k3 -gr bag13.ia > bag13-sorted.ia
+#     awk 'OFS=":" {print$1, $2}' bag13-sorted.ia | head -n 5000 > plink_aim.txt
+#     
+# 
+# #plink
 echo "running plink..."
-    cd ..
+    cd $CLUSTER_SCRATCH/gbs/analysis
+#     #sanitize variant ids 
+#     bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
     
-    #sanitize variant ids 
-    bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
-    
-    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --thin-bp 10000 --threads $SLURM_NTASKS --silent --out admix
+    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --bp-space 10000 --threads $SLURM_NTASKS --silent --out admix
     
 echo "estimating admixture"
 #run admixture
