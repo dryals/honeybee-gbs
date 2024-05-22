@@ -58,7 +58,7 @@ module load biocontainers vcftools bcftools plink anaconda r
 echo "filtering input..."
 #filter the input
     #remove low-qual samples and drones
-    bcftools view bag13.bcf.gz -S ^bag13-remove.txt -q 0.01:minor -e 'F_MISSING>0.08' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
+    bcftools view bag13.bcf.gz -S ^bag13-remove.txt -q 0.01:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
     bcftools index -c bag13-filter.bcf.gz
     
     #depth and coverage stats
