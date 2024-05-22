@@ -42,7 +42,8 @@ module load biocontainers vcftools bcftools plink anaconda
 #     cp bag13-final.vcf ../../analysis
 #     
      cd $CLUSTER_SCRATCH/gbs/analysis
-    
+   
+echo "sorting input..."
 #sort the input
 #     cat bag13-final.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > bag13-sorted.vcf
 #     conda activate ipyrad 
@@ -54,6 +55,7 @@ module load biocontainers vcftools bcftools plink anaconda
     bcftools index -c bag13.bcf.gz 
     
     
+echo "filtering input..."
 #filter the input
     bcftools view bag13.bcf.gz -q 0.01:minor -e 'F_MISSING>0.05' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
     bcftools index -c bag13-filter.bcf.gz
@@ -67,6 +69,7 @@ module load biocontainers vcftools bcftools plink anaconda
 #     bcftools index -c reference.bcf.gz
 
 
+echo "merging with reference..."
 #merge in the references
     #save vcf sites
     bcftools query bag13-filter.bcf.gz -f'%CHROM\t%POS\n' -o gbs.sites
@@ -79,6 +82,7 @@ module load biocontainers vcftools bcftools plink anaconda
     
     bcftools index -c admix.bcf.gz
 
+echo "finding AIMs..."
 #find AIMs
     #get popfrq
     mkdir -p aim
@@ -102,6 +106,7 @@ module load biocontainers vcftools bcftools plink anaconda
     
 
 #plink
+echo "running plink..."
     cd ..
     
     #sanitize variant ids 
@@ -109,6 +114,7 @@ module load biocontainers vcftools bcftools plink anaconda
     
     plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --threads $SLURM_NTASKS --silent --out admix
     
+echo "estimating admixture"
 #run admixture
     #create pop file
     cd ~/ryals/honeybee-gbs/
@@ -118,12 +124,13 @@ module load biocontainers vcftools bcftools plink anaconda
     
     ADMIX=/depot/bharpur/apps/admixture/admixture
     $ADMIX admix.bed 4 -j${SLURM_NTASKS} --cv=20 --supervised > admix.out
-        
+    
+echo "estimating relatedness..."
 #run NGSremix
     #this takes a hot minute
     NGSremix=/depot/bharpur/apps/NGSremix/src/NGSremix
     #make sure to edit 'select' to remove the references... this can be done programmatically
-    $NGSremix -plink admix -f admix.4.P -q admix.4.Q -P 1 -o test.rel -select 75-169
+    $NGSremix -plink admix -f admix.4.P -q admix.4.Q -P 1 -o test.rel -select 75-258
     
 
     
