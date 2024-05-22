@@ -90,7 +90,7 @@ echo "finding AIMs..."
     cd aim
     for pop in A C M O
     do
-        bcftools view ../reference-filter.bcf.gz -S ~/ryals/admixPipeline/references/${pop}.txt -Ou | bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o ${pop}.frq
+        bcftools view ../admix.bcf.gz -S ~/ryals/admixPipeline/references/${pop}.txt -Ou | bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o ${pop}.frq
         
         awk '{print $3}' ${pop}.frq > ${pop}.tmp
     done

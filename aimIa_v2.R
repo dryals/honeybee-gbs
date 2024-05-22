@@ -1,6 +1,7 @@
 #Dylan Ryals
 
-#last edit: 15 MAY 2024
+#last edit: 22 MAY 2024
+#added as.numeric() to protect calculations
 
 #get N for each pop and total
 setwd("/depot/bharpur/data/projects/ryals/admixPipeline/references")
@@ -41,6 +42,7 @@ freqs$p = as.matrix(freqs[3:(k+2)]) %*% popN$V1[1:k] / popN$V1[(k+1)]
 
 #protected log function: log(0) = 0
 p.log = function(x){
+  x = as.numeric(x)
   ifelse(x == 0, 0, log(x))
 }
 
@@ -48,9 +50,9 @@ print("running...")
 
 #calculate Ia across all sites L
 Ia = apply(freqs, 1, function(L){
-  
+
   #allele frequencies at site
-  f = unlist(L[3:(k+2)])
+  f = as.numeric(unlist(L[3:(k+2)]))
   #matrix for combinatorial products
     #j = 0
   pd1 = sapply(1:k, function(x){prod(f[x] - f[-x])}, simplify = T)
@@ -64,7 +66,8 @@ Ia = apply(freqs, 1, function(L){
   S = c(sum(s1[1:k]), sum(s1[(k+1):(2*k)]))
   #outer summation
     #pull pop-wide freq
-  pj = unlist(L[k+3])
+  pj = as.numeric(unlist(L[k+3]))
+  
     #calculate for j=0 and j=1, add to inner summation S
     #sum these for total Ia expression
   sum(c(pj * (-1 * p.log(pj) + 1 - stirfack), 
