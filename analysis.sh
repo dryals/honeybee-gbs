@@ -10,7 +10,7 @@
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/analysis.out
 
 #Dylan Ryals 15 MAY 2023
-#last edited
+#last edited 22 May 2023
 
 date
 
@@ -22,14 +22,14 @@ module load biocontainers vcftools bcftools plink anaconda
 
 
 # %coverage ???
-    #23-T3w04-mapped-sorted.bam as an example file
-    cd $CLUSTER_SCRATCH/gbs/ipyrad/test-gbs_refmapping
-    samtools depth -a 23-II42w06-mapped-sorted.bam > ../../analysis/II42w06.depth
-    
-    cd $CLUSTER_SCRATCH/gbs/analysis
-    
-    echo "$( grep -Pc "\t0" II42w06.depth ) / $( wc -l II42w06.depth | awk '{print $1}')" | bc -l
-    
+#     #23-T3w04-mapped-sorted.bam as an example file
+#     cd $CLUSTER_SCRATCH/gbs/ipyrad/test-gbs_refmapping
+#     samtools depth -a 23-II42w06-mapped-sorted.bam > ../../analysis/II42w06.depth
+#     
+#     cd $CLUSTER_SCRATCH/gbs/analysis
+#     
+#     echo "$( grep -Pc "\t0" II42w06.depth ) / $( wc -l II42w06.depth | awk '{print $1}')" | bc -l
+#     
 
 #format and fix the input file
     #set some global variables 
@@ -37,41 +37,45 @@ module load biocontainers vcftools bcftools plink anaconda
     refs=/depot/bharpur/data/popgenomes/HarpurPNAS/output_snp.vcf.gz
     rename=/home/dryals/ryals/admixPipeline/chrsrename.txt
     chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
-        
-    bcftools sort test-branch.vcf.gz -Ob -o test.bcf.gz
+    
+#     cd $CLUSTER_SCRATCH/gbs/ipyrad/bag13-final_outfiles
+#     cp bag13-final.vcf ../../analysis
+#     
+     cd $CLUSTER_SCRATCH/gbs/analysis
     
 #sort the input
-    cat test-branch.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > test-sorted.vcf
-    conda activate ipyrad 
-    bgzip test-sorted.vcf
+#     cat bag13-final.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > bag13-sorted.vcf
+#     conda activate ipyrad 
+#     bgzip bag13-sorted.vcf
+#     conda deactivate
     
-    bcftools index -c test-sorted.vcf.gz 
-    bcftools annotate test-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o test.bcf.gz
-    bcftools index -c test.bcf.gz 
+#     bcftools index -c bag13-sorted.vcf.gz 
+    bcftools annotate bag13-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force -Ob -o bag13.bcf.gz
+    bcftools index -c bag13.bcf.gz 
     
     
 #filter the input
-    bcftools view test.bcf.gz -q 0.05:minor -e 'F_MISSING>0.1' --threads $SLURM_NTASKS -Ob -o test-filter.bcf.gz
-    bcftools index -c test-filter.bcf.gz
+    bcftools view bag13.bcf.gz -q 0.01:minor -e 'F_MISSING>0.05' --threads $SLURM_NTASKS -Ob -o bag13-filter.bcf.gz
+    bcftools index -c bag13-filter.bcf.gz
     
     #depth and coverage stats
-    bcftools query -l test-filter.bcf.gz > test-filter.names
-    bcftools query -f'%CHROM\t%POS\t%DP\n' test-filter.bcf.gz > test-filter.depth
+    bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
+    bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
     #rscript ...
 
 #grab reference file 
-    bcftools index -c reference.bcf.gz
+#     bcftools index -c reference.bcf.gz
 
 
 #merge in the references
     #save vcf sites
-    bcftools query test-filter.bcf.gz -f'%CHROM\t%POS\n' -o gbs.sites
+    bcftools query bag13-filter.bcf.gz -f'%CHROM\t%POS\n' -o gbs.sites
     #filter 
     bcftools view reference.bcf.gz -T gbs.sites --threads $SLURM_NTASKS -Ob -o reference-filter.bcf.gz
         #index
         bcftools index -c reference-filter.bcf.gz
     #merge
-    bcftools merge reference-filter.bcf.gz test-filter.bcf.gz -m snps -Ou | bcftools norm -m +snps -Ou | bcftools view -M2 -m2 --threads $SLURM_NTASKS -Ob -o admix.bcf.gz
+    bcftools merge reference-filter.bcf.gz bag13-filter.bcf.gz -m snps -Ou | bcftools norm -m +snps -Ou | bcftools view -M2 -m2 --threads $SLURM_NTASKS -Ob -o admix.bcf.gz
     
     bcftools index -c admix.bcf.gz
 
@@ -125,12 +129,12 @@ module load biocontainers vcftools bcftools plink anaconda
     
 #### additional analysis ###
     
-#LD decay on Indiana honeybees 
-    #bell
-    cd $CLUSTER_SCRATCH/gbs/analysis
-    
-
-plink --bcf $CLUSTER_SCRATCH/pipeline/allsamp.filter.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --keep ~/ryals/honeybee-gbs/data/plink_indy.txt --thin 0.1 --r2 gz --ld-window 100 --ld-window-kb 2000 --ld-window-r2 0 --silent --threads $SLURM_NTASKS --out indy2 &
+# #LD decay on Indiana honeybees 
+#     #bell
+#     cd $CLUSTER_SCRATCH/gbs/analysis
+#     
+# 
+# plink --bcf $CLUSTER_SCRATCH/pipeline/allsamp.filter.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --keep ~/ryals/honeybee-gbs/data/plink_indy.txt --thin 0.1 --r2 gz --ld-window 100 --ld-window-kb 2000 --ld-window-r2 0 --silent --threads $SLURM_NTASKS --out indy2 &
 
     #Rscript...
         
