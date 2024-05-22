@@ -3,8 +3,8 @@
 # FILENAME: analysis.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=4
-#SBATCH --time=1-00:00:00
+#SBATCH --ntasks=8
+#SBATCH --time=03:00:00
 #SBATCH --job-name gbs_analysis
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/analysis.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/analysis.out
