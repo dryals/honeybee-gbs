@@ -23,7 +23,7 @@ library(reshape2)
 
 
 #ngs rel
-reladmix = read.delim("data/test.rel", header = T)
+reladmix = read.delim("data/bag13.rel", header = T)
 
 reladmix$r = reladmix$k2 + (reladmix$k1 / 2)
 
@@ -41,17 +41,83 @@ diag(relmat) = 1
 relmat = forceSymmetric(relmat,uplo="L") %>% as.matrix
 
 
+
+#check a's and b's (replicates)
+relmat["23-T5w01a", "23-T5w01b"]
+
 meta = data.frame(id = relid$id)
 meta$col = gsub("23-(.*)[wd].*", "\\1", meta$id)
 
-qgraph(relmat, layout='spring', vsize=6,
+
+#helpful labels
+new.names = matrix( data =
+                      c("II17", "Ii1a",
+                        "II18", "Ii1b",
+                        "II19", "Tx1",
+                        "II20", "Ix1",
+                        "II22", "Ti1",
+                        "II28", "Ix2",
+                        "II29", "Ti2",
+                        "II32", "Ii2",
+                        "II40", "Ix3",
+                        "II42", "Ti3",
+                        "II43", "Tx3",
+                        "II44", "Ii3"),
+                    nrow = 12, byrow = T
+)
+
+meta$new = meta$col
+for (i in 1:nrow(new.names)){
+  meta$new[grepl(new.names[i,1], meta$id)] = new.names[i,2]
+}
+
+meta$cross = paste0(meta$col, ":", meta$new)
+
+
+
+qgraph(relmat, layout='spring', vsize=5,
        cut = 0, repulsion = 1, diag = F,
        minimum = 0.01, maximum = 0.75,
-       labels = meta$id,
+       labels = meta$col,
        #label.cex = 1.2,
-       groups = meta$col, palette = "pastel",
+       groups = meta$cross, palette = "pastel",
        #edge.labels = T,
-       legend = F)
+       legend = T)
+
+#plot against pedigree relatedness
+write.table(meta %>% select(id, col), "data/ids.txt", col.names = F, row.names = F, quote = F)
+
+GRM = relmat
+
+PRM = read.delim("/home/dylan/Documents/bees/harpurlab/misc/ped/divExPed.tab",
+                 header = T, sep = "")
+colnames(PRM) = rownames(PRM)
+
+
+PRM2 = PRM[colnames(GRM), colnames(GRM)]
+
+d = GRM - PRM2
+
+d.t = lower.tri(d, diag = F) %>% as.vector()
+
+colnames(misses) = "value"
+
+ggplot(data = misses, aes(x = value)) + geom_histogram()
+
+
+ggplot(misses, aes(x = ))
+
+offset = rowSums(abs(PRM2 - GRM))
+
+off2 = cbind(meta, offset)
+
+off2 %>% group_by(col) %>% summarise(md = mean(offset))
+
+
+
+
+
+
 
 
 #plot admixture

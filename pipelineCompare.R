@@ -26,3 +26,24 @@ ggplot(both.mapped, aes(x = value)) +
   labs(y = "samples", x = "number of reads") +
   theme_bw()
   
+
+#remove samples with few clusters
+dr %>% arrange(desc(loci_in_assembly)) %>%
+  mutate(order = 1:nrow(dr)) %>%
+  ggplot(aes(x = order, y = loci_in_assembly)) + geom_col()
+
+
+dr %>% arrange(loci_in_assembly) %>% slice(1:20) %>% select(sample, loci_in_assembly)
+
+remove = dr %>% filter(loci_in_assembly < 10000) %>% select(sample)
+write.table(remove$sample, "data/bag13-lowqual.txt", col.names = F, row.names = F, quote = F)
+
+#remove drones
+
+drones = dr$sample[grepl("d", dr$sample)]
+write.table(drones, "data/bag13-drones.txt", col.names = F, row.names = F, quote = F)
+
+#remove both
+remove2 = unique(c(drones, remove$sample))
+write.table(remove2, "data/bag13-remove.txt", col.names = F, row.names = F, quote = F)
+
