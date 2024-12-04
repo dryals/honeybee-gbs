@@ -108,38 +108,46 @@ module load biocontainers vcftools bcftools plink anaconda r
 #     sort -k3 -gr bag13.ia > bag13-sorted.ia
 #     awk 'OFS=":" {print$1, $2}' bag13-sorted.ia | head -n 5000 > plink_aim.txt
 #     
-
-#plink
-echo "running plink..."
-    cd $CLUSTER_SCRATCH/gbs/analysis
-    #sanitize variant ids 
-    bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
+# 
+# #plink
+# echo "running plink..."
+#     cd $CLUSTER_SCRATCH/gbs/analysis
+#     #sanitize variant ids 
+#     bcftools annotate admix.bcf.gz -I '.' --threads $SLURM_NTASKS -Ob -o admix2.bcf.gz
+#     
+#     #consider ld pruning...
+#     plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --threads $SLURM_NTASKS --silent --out admix
+#     
+# echo "estimating admixture"
+# #run admixture
+#     #create pop file
+#     cd ~/ryals/honeybee-gbs/
+#     R --vanilla --no-save --no-echo --silent < makeAdmixPop.R
+#     sleep 3
+#     cd -
+#     
+#     ADMIX=/depot/bharpur/apps/admixture/admixture
+#     $ADMIX admix.bed 4 -j${SLURM_NTASKS} --cv=20 --supervised > admix.out
+#     
+# echo "estimating relatedness..."
+# #run NGSremix
+#     NGSremix=/depot/bharpur/apps/NGSremix/src/NGSremix
+#     #calculate sample start and end
+#     end=$( wc -l admix.pop | awk '{print $1}' )
+#     samps=$( grep -c "-" admix.pop )
+#     start=$( echo "$end - $samps + 1" | bc )
+#     
+#     $NGSremix -plink admix -f admix.4.P -q admix.4.Q -P 1 -o bag13.rel -select ${start}-${end} &
     
-    #consider ld pruning...
-    plink --bcf admix2.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort --set-missing-var-ids @:# --extract aim/plink_aim.txt --threads $SLURM_NTASKS --silent --out admix
+#GRM
+    #filter a test file
+    bcftools view bag13-filter.bcf.gz -r 11 --threads $SLURM_NTASKS \
+    -Oz -o bag13-filter-short.vcf.gz
     
-echo "estimating admixture"
-#run admixture
-    #create pop file
-    cd ~/ryals/honeybee-gbs/
-    R --vanilla --no-save --no-echo --silent < makeAdmixPop.R
-    sleep 3
-    cd -
+    #R script
     
-    ADMIX=/depot/bharpur/apps/admixture/admixture
-    $ADMIX admix.bed 4 -j${SLURM_NTASKS} --cv=20 --supervised > admix.out
     
-echo "estimating relatedness..."
-#run NGSremix
-    NGSremix=/depot/bharpur/apps/NGSremix/src/NGSremix
-    #calculate sample start and end
-    end=$( wc -l admix.pop | awk '{print $1}' )
-    samps=$( grep -c "-" admix.pop )
-    start=$( echo "$end - $samps + 1" | bc )
     
-    $NGSremix -plink admix -f admix.4.P -q admix.4.Q -P 1 -o bag13.rel -select ${start}-${end} &
-    
-
     
 #### additional analysis ###
     
