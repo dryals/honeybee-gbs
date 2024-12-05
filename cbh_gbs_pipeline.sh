@@ -59,6 +59,10 @@ echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
     #first step: demultiplexing
     ipyrad -p params-23CBH_${P}.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
+        #8 cores * 10GB work, not minimum
+            #time: 
+    
+#OLD
     
 #     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
 #     
