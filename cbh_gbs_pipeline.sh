@@ -58,9 +58,10 @@ echo "setup plate $P ... "
 echo "starting ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
     #first step: demultiplexing
-    ipyrad -p params-23CBH_${P}.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
-        #8 cores * 10GB work, not minimum
-            #time: 
+    ipyrad -p params-23CBH_${P}.txt -s 12345 -c $SLURM_NTASKS -d -f --MPI
+        #s1 8 cores * 10GB work, not minimum
+            #time: 2:55
+        #s1-5 8 cores * 10 GB: 
     
 #OLD
     
