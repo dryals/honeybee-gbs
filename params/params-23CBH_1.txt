@@ -1,8 +1,8 @@
 ------- ipyrad params file (v.0.9.95)-------------------------------------------
 23CBH_1                       ## [0] [assembly_name]: Assembly name. Used to name output directories for assembly steps
-/scratch/negishi/dryals/gbs/cbh_ipyrad/plate_1 ## [1] [project_dir]: Project dir (made in curdir if not present)
+/scratch/negishi/dryals/gbs/23CBH/23CBH_1 ## [1] [project_dir]: Project dir (made in curdir if not present)
 /home/dryals/ryals/honeybee-gbs/data/CBH2023/23CBH_1/*fastq.gz   ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
-/home/dryals/ryals/honeybee-gbs/barcodes/...  ## [3] [barcodes_path]: Location of barcodes file
+/home/dryals/ryals/honeybee-gbs/barcodes/23CBH_formatted/23CBH_1.txt  ## [3] [barcodes_path]: Location of barcodes file
                                ## [4] [sorted_fastq_path]: Location of demultiplexed/sorted fastq files
 reference                      ## [5] [assembly_method]: Assembly method (denovo, reference)
 /depot/bharpur/data/ref_genomes/AMELAmel_HAv3.1_genomic.fna     ## [6] [reference_sequence]: Location of reference sequence file
