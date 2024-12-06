@@ -31,7 +31,9 @@ conda activate ipyrad
 # 
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
-echo "here we go" > $log
+
+echo "------------here we go again-------------" >> $log
+date >> $log
 
 #sort which plates to process
 #     for i in 2 4 5 6 7 8 10 11 12 17 18
@@ -39,12 +41,11 @@ echo "here we go" > $log
 #         echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
 #     done
     
-    SLURM_ARRAY_TASK_ID=3
 
     k=4 #number of mitotypes per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
-    echo "$nstart $nend"
+    echo "task $SLURM_ARRAY_TASK_ID processing $nstart - $nend" >> $log
  
 #main processing loop
 cat $CLUSTER_SCRATCH/gbs/23CBH/todo.txt | sed -n "${nstart},${nend} p" | while read P
