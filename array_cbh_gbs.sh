@@ -5,7 +5,7 @@
 #SBATCH -A bharpur
 #SBATCH --ntasks=8
 #SBATCH --mem-per-cpu=6G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=1-10:00:00
 #SBATCH --job-name array_cbh_gbs
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump.out
@@ -48,7 +48,7 @@ echo "setup plate $P ... " >> $log
     #_R1_ and _R2_ required in filename!!!
     cd data/CBH2023
     #exit if file not found
-    ls *CBH_${P} || exit
+    ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
     #rename dirs without year code
     if [ -d "CBH_${P}" ]; then
         echo "renaming dir"
@@ -70,7 +70,7 @@ echo "setup plate $P ... " >> $log
 echo "starting ipyrad plate $P ..." >> $log
     cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
     #first step: demultiplexing
-    ipyrad -p params-23CBH_${P}.txt -s 123 -c $SLURM_NTASKS -d --MPI
+    ipyrad -p params-23CBH_${P}.txt -s 123 -c $SLURM_NTASKS -d -f --MPI
         #s1 8 cores * 10GB work, not minimum
             #time: 2:55
         #s1-5 8 cores * 10 GB (48 CPU): 1 day or mores
