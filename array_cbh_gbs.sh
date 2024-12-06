@@ -32,14 +32,19 @@ conda activate ipyrad
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 
-echo "------------here we go again-------------" >> $log
-date >> $log
-
-#sort which plates to process
-#     for i in 2 4 5 6 7 8 10 11 12 17 18
-#     do
-#         echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#     done
+#additional setup if first task
+     #TODO: somehow verify task 1 has done this before continuing 
+        #just manually reset log for now...
+# if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
+#     date > $log
+# 
+#     #sort which plates to process
+#         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+#         for i in 2 4 5 6 7 8 10 11 12 17 18
+#         do
+#             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+#         done
+# fi
     
 
     k=4 #number of mitotypes per job
@@ -111,6 +116,8 @@ do
         date >> $log
  
  done
+    #TODO: attempt to merge, may need to re-run some with -f to get all on the same page ... 
+ 
     #OLD
         
     #     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
