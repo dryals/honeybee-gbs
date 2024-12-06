@@ -34,11 +34,10 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 echo "here we go" > $log
 
 #sort which plates to process
-
-    for i in 2 4 5 6 7 8 10 11 12 17 18
-    do
-        echo $i >> todo.txt
-    done
+#     for i in 2 4 5 6 7 8 10 11 12 17 18
+#     do
+#         echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+#     done
     
     SLURM_ARRAY_TASK_ID=3
 
@@ -48,7 +47,7 @@ echo "here we go" > $log
     echo "$nstart $nend"
  
 #main processing loop
-cat todo.txt | sed -n "${nstart},${nend} p" | while read P
+cat $CLUSTER_SCRATCH/gbs/23CBH/todo.txt | sed -n "${nstart},${nend} p" | while read P
 do
         
     echo "starting plate ${P}" >> $log
