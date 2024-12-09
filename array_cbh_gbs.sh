@@ -31,7 +31,7 @@ conda activate ipyrad
 # 
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
-echo -n "" > $log
+#echo -n "" > $log
 
 #additional setup if first task
      #TODO: somehow verify task 1 has done this before continuing 
