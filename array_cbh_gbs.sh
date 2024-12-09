@@ -31,6 +31,7 @@ conda activate ipyrad
 # 
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
+echo -n "" > $log
 
 #additional setup if first task
      #TODO: somehow verify task 1 has done this before continuing 
@@ -40,14 +41,16 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 # 
 #     #sort which plates to process
 #         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#         for i in 2 4 5 6 7 8 10 11 12 17 18
+#         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
+#         #for i in 19 20 21 22 23 30 31 9
+#         for i in 4 5 6 8 9 10 11 17 18 19 20 21 22 23 30 31
 #         do
 #             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
 #         done
 # fi
     
 
-    k=4 #number of mitotypes per job
+    k=6 #number of mitotypes per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
     echo "task $SLURM_ARRAY_TASK_ID processing $nstart - $nend" >> $log
@@ -67,7 +70,8 @@ do
         #new working dir for this plate
         mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #edit param file to use plate name and save to dir
-        param=$( cat params/params-23CBH_PLATE.txt)
+        cd ~/ryals/honeybee-gbs
+        param=$( cat params/params-23CBH_PLATE.txt )
         echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
         
     #rename dirs and fastqs
@@ -110,6 +114,7 @@ do
             #find min memorgy req for first step
                 #run max in parallel, run multiple samples in sequence
                 #merge everything to run from step2 onwards more efficiently (i think?)
+            #try dierting output to separate logfiles?
                 
     echo "finished plate ${P}" >> $log
         echo -n "    " >> $log
