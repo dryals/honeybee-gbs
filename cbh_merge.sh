@@ -47,7 +47,7 @@ echo "launching ipyrad..."
 #     ipyrad -p params-merged.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
     #try 18 cores qtih 10GB ea ...
     
-    cd cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
+    cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
     ipyrad -p params-testmerge.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
     
     
