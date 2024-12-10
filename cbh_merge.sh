@@ -3,8 +3,8 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=4
-#SBATCH --mem-per-cpu=10G
+#SBATCH --ntasks=20
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=1-10:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -49,8 +49,12 @@ echo "launching ipyrad..."
     
     cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
     ipyrad -p params-testmerge.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
-        #s3 alone may take 7 days.. I'm not sure ...
-            #try more cores, else may require several merging steps ...
+        #s3 alone may take 4.5 days with only 4 cores.. I'm not sure ...
+            #try more cores 
+            #try 32 tasks * 6GB ... might not be enough mem
+            #also try 64 cores on highmem for 1d .. although this might not complete in time...
+            #finally try re-filtering with stricter settings (v2) to reduce data
+            #... or several merging steps to get past s3 in reasonable time ...
             
     
     
