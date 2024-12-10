@@ -3,9 +3,9 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
+#SBATCH --ntasks=28
 #SBATCH --mem-per-cpu=6G
-#SBATCH --time=1-10:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -26,13 +26,13 @@ echo "-------------"
 # echo "merging plates..."
 #     #gather completed files
 #     cd $CLUSTER_SCRATCH/gbs/23CBH
-#         mkdir -p merged
-#         cd merged
+#         mkdir -p testmerge2
+#         cd testmerge2
 #         #create var with all plate names
 #         ls ../*/*.json
 #         #...
 #         echo -n "" > mergep.txt
-#         for i in 1 2 3 7 12
+#         for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
 #         do
 #             echo -n "../23CBH_${i}/params-23CBH_${i}.txt " >> mergep.txt
 #         done 
@@ -40,18 +40,21 @@ echo "-------------"
 #         mp=$( cat mergep.txt )
 #         
 #     #create merged param file
-#     ipyrad -m merged $mp
-#         #edit if needed...
+#     ipyrad -m testmerge2 $mp
+    
+    #edit if needed...
         
 echo "launching ipyrad..."
 #     ipyrad -p params-merged.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
-    #try 18 cores qtih 10GB ea ...
     
     cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
-    ipyrad -p params-testmerge.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
-        #s3 alone may take 4.5 days with only 4 cores.. I'm not sure ...
-            #try more cores 
-            #try 32 tasks * 6GB ... might not be enough mem
+    ipyrad -p params-testmerge.txt -s 345 -c $SLURM_NTASKS -d -f --MPI
+        #only 5 plates
+        #s3 alone may take 4.5 days with only 4 tasks... 
+            #try 20 tasks * 6GB
+                # ~ 1.4 days 
+                #might not be enough mem?
+                #not neccesarily scaling with number of cores.. .may need to break bulk
             #also try 64 cores on highmem for 1d .. although this might not complete in time...
             #finally try re-filtering with stricter settings (v2) to reduce data
             #... or several merging steps to get past s3 in reasonable time ...

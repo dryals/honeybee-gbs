@@ -27,5 +27,5 @@ AWTC,                    ## [8] [restriction_overhang]: Restriction overhang (cu
 6, 130, 6, 100                     ## [25] [trim_reads]: Trim raw read edges (R1>, <R1, R2>, <R2) (see docs)
 0, 0, 0, 0                     ## [26] [trim_loci]: Trim locus edges (see docs) (R1>, <R1, R2>, <R2)
 v                        ## [27] [output_formats]: Output formats (see docs)
-                               ## [28] [pop_assign_file]: Path to population assignment file
+                               ## [28] [pop_assign_file]: Path to population assignment fil:wqe
                                ## [29] [reference_as_filter]: Reads mapped to this reference are removed in step 3
