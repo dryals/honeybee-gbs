@@ -7,8 +7,8 @@
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=1-10:00:00
 #SBATCH --job-name array_cbh_gbs
-#SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump.out
-#SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump.out
+#SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
+#SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
 
 #Dylan Ryals 06 DEC 2024
 #last edited 
@@ -30,12 +30,13 @@ conda activate ipyrad
 #     Rscript --vanilla --silent barcodes.R
 # 
 
+#output logfile to track all jobs at once
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
-#echo -n "" > $log
 
 #additional setup if first task
      #TODO: somehow verify task 1 has done this before continuing 
         #just manually reset log for now...
+        #echo -n "" > $log
 # if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
 #     date > $log
 # 
@@ -50,23 +51,24 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 # fi
     
 
-    k=6 #number of mitotypes per job
+    k=6 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
-    echo "task $SLURM_ARRAY_TASK_ID processing $nstart - $nend" >> $log
+    #echoing commands to stdout and logfile so progress can be tracked both places
+    echo "task $SLURM_ARRAY_TASK_ID processing n = $nstart - $nend" >> $log
+        echo "task $SLURM_ARRAY_TASK_ID processing n = $nstart - $nend"
  
 #main processing loop
 cat $CLUSTER_SCRATCH/gbs/23CBH/todo.txt | sed -n "${nstart},${nend} p" | while read P
 do
         
-    echo "starting plate ${P}" >> $log
-        echo -n "    " >> $log
+    echo "    starting plate ${P}" >> $log
+        echo -n "        " >> $log
         date >> $log
-
+        echo "    starting plate ${P}" 
 
 
     #copy parameter file into scratch directory
-        #TODO: create param files with vim or something
         #new working dir for this plate
         mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #edit param file to use plate name and save to dir
@@ -97,7 +99,7 @@ do
             cd ..
         fi    
 
-    echo "starting ipyrad plate $P ..." >> $log
+    #ipyrad
         cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #first step: demultiplexing
         ipyrad -p params-23CBH_${P}.txt -s 12 -c $SLURM_NTASKS -d -f --MPI
@@ -109,15 +111,12 @@ do
             #testing s12 with 6GB per task
                 #this take 32 cores, I can run about 3 at a time...
                 #s1-2 takes basically 4.5 hrs
-                #failures in parallel mode will be real hard to track...
-                #consider just the first 2 steps (or something), then the rest merged...
-            #find min memorgy req for first step
-                #run max in parallel, run multiple samples in sequence
-                #merge everything to run from step2 onwards more efficiently (i think?)
-            #try dierting output to separate logfiles?
+            #try decreasing memory and just running s1 for the rest of plates
+                #then merge everything at s2 and go from there with max cores... easiest to manage?
+
                 
-    echo "finished plate ${P}" >> $log
-        echo -n "    " >> $log
+    echo "    finished plate ${P}" >> $log
+        echo -n "        " >> $log
         date >> $log
  
  done
@@ -140,7 +139,9 @@ do
 
     
 ####
-echo "DONE set $SLURM_ARRAY_TASK_ID" >> $log
+echo "DONE task $SLURM_ARRAY_TASK_ID" >> $log
+    echo -n "    " >> $log
+    date >> $log
 date
 
 

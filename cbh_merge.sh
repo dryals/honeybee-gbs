@@ -49,6 +49,9 @@ echo "launching ipyrad..."
     
     cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
     ipyrad -p params-testmerge.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
+        #s3 alone may take 7 days.. I'm not sure ...
+            #try more cores, else may require several merging steps ...
+            
     
     
     # 
