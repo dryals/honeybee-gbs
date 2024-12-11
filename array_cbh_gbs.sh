@@ -32,6 +32,7 @@ conda activate ipyrad
 
 #output logfile to track all jobs at once
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
+#date > $log
 
 #additional setup if first task
      #TODO: somehow verify task 1 has done this before continuing 
@@ -103,7 +104,7 @@ do
     #ipyrad
         cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #first step: demultiplexing
-        ipyrad -p params-23CBH_${P}.txt -s 2 -c $SLURM_NTASKS -d -f --MPI
+        ipyrad -p params-23CBH_${P}.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
             #s1 8 cores * 10GB work, not minimum
                 #time: 2:55
             #s1-5 8 cores * 10 GB (48 CPU): basically 1 day
