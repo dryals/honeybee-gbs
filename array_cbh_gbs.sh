@@ -3,7 +3,7 @@
 # FILENAME: array_cbh_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=12
+#SBATCH --ntasks=9
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=1-10:00:00
 #SBATCH --job-name array_cbh_gbs
