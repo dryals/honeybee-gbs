@@ -3,7 +3,7 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=28
+#SBATCH --ntasks=24
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=2-00:00:00
 #SBATCH --job-name cbh_merge
@@ -58,6 +58,7 @@ echo "launching ipyrad..."
             #also try 64 cores on highmem for 1d .. although this might not complete in time...
             #finally try re-filtering with stricter settings (v2) to reduce data
             #... or several merging steps to get past s3 in reasonable time ...
+        #I'm now thinking only merging at s5 ... 
             
     
     
