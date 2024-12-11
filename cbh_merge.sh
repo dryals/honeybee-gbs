@@ -23,32 +23,33 @@ conda activate ipyrad
 
 echo "-------------"
 
-# echo "merging plates..."
-#     #gather completed files
-#     cd $CLUSTER_SCRATCH/gbs/23CBH
-#         mkdir -p testmerge2
-#         cd testmerge2
-#         #create var with all plate names
-#         ls ../*/*.json
-#         #...
-#         echo -n "" > mergep.txt
-#         for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
-#         do
-#             echo -n "../23CBH_${i}/params-23CBH_${i}.txt " >> mergep.txt
-#         done 
-#             echo "" >> mergep.txt
-#         mp=$( cat mergep.txt )
-#         
-#     #create merged param file
-#     ipyrad -m testmerge2 $mp
+echo "merging plates..."
+    #gather completed files
+    cd $CLUSTER_SCRATCH/gbs/23CBH
+        mkdir -p testmerge3
+        cd testmerge3
+        #create var with all plate names
+        ls ../*/*.json
+        #...
+        echo -n "" > mergep.txt
+        #for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+        for i in 22 30
+        do
+            echo -n "../23CBH_${i}/params-23CBH_${i}.txt " >> mergep.txt
+        done 
+            echo "" >> mergep.txt
+        mp=$( cat mergep.txt )
+        
+    #create merged param file
+    ipyrad -m testmerge3 $mp
     
     #edit if needed...
         
 echo "launching ipyrad..."
 #     ipyrad -p params-merged.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
     
-    cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge
-    ipyrad -p params-testmerge.txt -s 345 -c $SLURM_NTASKS -d -f --MPI
+    cd $CLUSTER_SCRATCH/gbs/23CBH/testmerge3
+    ipyrad -p params-testmerge3.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
         #only 5 plates
         #s3 alone may take 4.5 days with only 4 tasks... 
             #try 20 tasks * 6GB
