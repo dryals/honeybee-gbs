@@ -3,9 +3,9 @@
 # FILENAME: array_cbh_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=9
+#SBATCH --ntasks=8
 #SBATCH --mem-per-cpu=6G
-#SBATCH --time=1-10:00:00
+#SBATCH --time=7-00:00:00
 #SBATCH --job-name array_cbh_gbs
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
@@ -32,6 +32,7 @@ conda activate ipyrad
 
 #output logfile to track all jobs at once
 log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
+#echo -n "" > $log
 #date > $log
 
 #additional setup if first task
@@ -45,15 +46,15 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 #         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
 #         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
 #         #for i in 19 20 21 22 23 30 31 9
-#         #for i in 4 5 6 8 9 10 11 17 18 19 20 21 22 23 30 31
-#         for i in 22 30
+#         for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+#         #for i in 22 30
 #         do
 #             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
 #         done
 # fi
     
 
-    k=1 #number of plates per job
+    k=7 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
     #echoing commands to stdout and logfile so progress can be tracked both places
@@ -104,7 +105,7 @@ do
     #ipyrad
         cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #first step: demultiplexing
-        ipyrad -p params-23CBH_${P}.txt -s 3 -c $SLURM_NTASKS -d -f --MPI
+        ipyrad -p params-23CBH_${P}.txt -s 234 -c $SLURM_NTASKS -d -f --MPI
             #s1 8 cores * 10GB work, not minimum
                 #time: 2:55
             #s1-5 8 cores * 10 GB (48 CPU): basically 1 day
