@@ -47,7 +47,7 @@ echo "-------------"
 #         
 echo "launching ipyrad..."
 #     ipyrad -p params-merged.txt -s 34567 -c $SLURM_NTASKS -d -f --MPI
-    
+    cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
     ipyrad -p params-varcalltest.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
         #only 5 plates
         #s3 alone may take 4.5 days with only 4 tasks... 
