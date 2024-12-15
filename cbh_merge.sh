@@ -3,7 +3,7 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
+#SBATCH --ntasks=18
 #SBATCH --mem-per-cpu=10G
 #SBATCH --time=2-00:00:00
 #SBATCH --job-name cbh_merge
