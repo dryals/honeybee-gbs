@@ -3,9 +3,9 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
+#SBATCH --ntasks=20
 #SBATCH --mem-per-cpu=10G
-#SBATCH --time=2-00:00:00
+#SBATCH --time=3-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
