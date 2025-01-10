@@ -1,2 +1,2 @@
 6G = 4 cores
-8G = 6 cores
+8G = 5 cores

@@ -3,8 +3,8 @@
 # FILENAME: array_cbh_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=8
-#SBATCH --mem-per-cpu=8G
+#SBATCH --ntasks=10
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name array_cbh_gbs
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
@@ -73,14 +73,14 @@ do
         echo "    starting plate ${P}" 
 
 
-#     #copy parameter file into scratch directory
-#         #new working dir for this plate
-#         mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
-#         #edit param file to use plate name and save to dir
-#         cd ~/ryals/honeybee-gbs
-#         param=$( cat params/params-23CBH_PLATE.txt )
-#         echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
-#         
+    #copy parameter file into scratch directory
+        #new working dir for this plate
+        mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
+        #edit param file to use plate name and save to dir
+        cd ~/ryals/honeybee-gbs
+        param=$( cat params/params-23CBH_PLATE.txt )
+        echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
+        
 #     #rename dirs and fastqs
 #         #_R1_ and _R2_ required in filename!!!
 #         cd data/CBH2023
@@ -113,11 +113,17 @@ do
             #s1-5 8 cores * 10 GB (48 CPU): basically 1 day
                 #i'm not sure which steps are better in parallel or together...
                 #test if we can get by with less GB and tasks may take fine-tuning per step...
-            #testing s12 with 6GB per task
+            #testing s1-4 with 6GB per task
                 #this take 32 cores, I can run about 3 at a time...
                 #s1-2 takes basically 4.5 hrs
             #try decreasing memory and just running s1 for the rest of plates
                 #then merge everything at s2 and go from there with max cores... easiest to manage?
+                
+            #extending parallel processing wtihin plates to s5
+                #does this really require 8gb?
+                #time for one plate: 
+                #consider GATK if this becomes unmanageable 
+                #8 cores and old params: 4% @ 26 min consesus calling
 
                 
     echo "    finished plate ${P}" >> $log
@@ -125,22 +131,6 @@ do
         date >> $log
  
  done
-    #TODO: attempt to merge, may need to re-run some with -f to get all on the same page ... 
- 
-    #OLD
-        
-    #     ipyrad -p params-bag13p2.txt -s 1 -c $SLURM_NTASKS -d -f --MPI
-    #     
-    #     ipyrad -m bag13 params-bag13p1.txt params-bag13p2.txt
-    # 
-    #     #attempt the rest of the steps
-    #     ipyrad -p params-bag13.txt -s 234567 -c $SLURM_NTASKS -d -f --MPI
-        
-        #drop samples that failed to assemble
-    #    ipyrad -p params-bag13.txt -b bag13-final - 23-II18w09
-        
-        #output final results
-    #    ipyrad -p params-bag13-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 
     
 ####
