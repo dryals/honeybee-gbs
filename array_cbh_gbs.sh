@@ -3,7 +3,7 @@
 # FILENAME: array_cbh_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=6
+#SBATCH --ntasks=8
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name array_cbh_gbs
@@ -29,30 +29,30 @@ conda activate ipyrad
 # #run R to output barcodes
 #     Rscript --vanilla --silent barcodes.R
 # 
-
-#output logfile to track all jobs at once
-log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
-#echo -n "" > $log
-#date > $log
-
-#additional setup if first task
-     #TODO: somehow verify task 1 has done this before continuing 
-        #just manually reset log for now...
-        #echo -n "" > $log
-# if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
-#     date > $log
 # 
-    #sort which plates to process
-        echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-        #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
-        #for i in 19 20 21 22 23 30 31 9
-        for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
-        #for i in 22 30
-        do
-            echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-        done
-# fi
-    
+# #output logfile to track all jobs at once
+ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
+# #echo -n "" > $log
+# #date > $log
+# 
+# #additional setup if first task
+#      #TODO: somehow verify task 1 has done this before continuing 
+#         #just manually reset log for now...
+#         #echo -n "" > $log
+# # if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
+# #     date > $log
+# # 
+#     #sort which plates to process
+#         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+#         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
+#         #for i in 19 20 21 22 23 30 31 9
+#         for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+#         #for i in 22 30
+#         do
+#             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+#         done
+# # fi
+#     
 
     k=7 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
