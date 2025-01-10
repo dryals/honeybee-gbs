@@ -123,7 +123,8 @@ do
                 #does this really require 8gb?
                 #time for one plate: 
                 #consider GATK if this becomes unmanageable 
-                #8 cores and old params: 4% @ 26 min consesus calling
+                #8 cores * 8Gb and old params: 4% @ 26 min consesus calling
+                #10 cores *6Gb and new params: 
 
                 
     echo "    finished plate ${P}" >> $log
