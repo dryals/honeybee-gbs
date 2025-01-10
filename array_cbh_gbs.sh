@@ -32,8 +32,10 @@ conda activate ipyrad
 # 
 # #output logfile to track all jobs at once
  log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
-# #echo -n "" > $log
-# #date > $log
+ 
+#     echo -n "" > $log
+#     date > $log
+#     
 # 
 # #additional setup if first task
 #      #TODO: somehow verify task 1 has done this before continuing 
