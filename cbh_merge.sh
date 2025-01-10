@@ -51,6 +51,13 @@ echo "launching ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
     ipyrad -p params-varcalltest.txt -s 567 -c $SLURM_NTASKS -d -f --MPI
     
+    #18 cores * 11Gb seems to work ... 
+        #try changing params to make consensus calls (s5) faster?
+            #dcrease 19, 
+        #try smaller batches in parallel??
+        
+        # ... try assembling with somehting else after ipyrad filters and demultiplexes ...
+    
         #only 5 plates
         #s3 alone may take 4.5 days with only 4 tasks... 
             #try 20 tasks * 6GB

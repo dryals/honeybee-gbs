@@ -3,8 +3,8 @@
 # FILENAME: array_cbh_gbs.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=8
-#SBATCH --mem-per-cpu=6G
+#SBATCH --ntasks=6
+#SBATCH --mem-per-cpu=8G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name array_cbh_gbs
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
@@ -42,15 +42,15 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
 # if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
 #     date > $log
 # 
-#     #sort which plates to process
-#         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
-#         #for i in 19 20 21 22 23 30 31 9
-#         for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
-#         #for i in 22 30
-#         do
-#             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#         done
+    #sort which plates to process
+        echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+        #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
+        #for i in 19 20 21 22 23 30 31 9
+        for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+        #for i in 22 30
+        do
+            echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
+        done
 # fi
     
 
@@ -71,41 +71,41 @@ do
         echo "    starting plate ${P}" 
 
 
-    #copy parameter file into scratch directory
-        #new working dir for this plate
-        mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
-        #edit param file to use plate name and save to dir
-        cd ~/ryals/honeybee-gbs
-        param=$( cat params/params-23CBH_PLATE.txt )
-        echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
-        
-    #rename dirs and fastqs
-        #_R1_ and _R2_ required in filename!!!
-        cd data/CBH2023
-        #exit if file not found
-        ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
-        #rename dirs without year code
-        if [ -d "CBH_${P}" ]; then
-            echo "renaming dir"
-            mv CBH_${P} 23CBH_${P}
-            cd 23CBH_${P}
-            mv CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
-            mv CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
-            cd ..
-        fi
-        #rename dirs with year code
-        if [ -f "23CBH_${P}/23CBH_${P}_1.fq.gz" ]; then
-            echo "renaming fastq"
-            cd 23CBH_${P}
-            mv 23CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
-            mv 23CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
-            cd ..
-        fi    
+#     #copy parameter file into scratch directory
+#         #new working dir for this plate
+#         mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
+#         #edit param file to use plate name and save to dir
+#         cd ~/ryals/honeybee-gbs
+#         param=$( cat params/params-23CBH_PLATE.txt )
+#         echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
+#         
+#     #rename dirs and fastqs
+#         #_R1_ and _R2_ required in filename!!!
+#         cd data/CBH2023
+#         #exit if file not found
+#         ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
+#         #rename dirs without year code
+#         if [ -d "CBH_${P}" ]; then
+#             echo "renaming dir"
+#             mv CBH_${P} 23CBH_${P}
+#             cd 23CBH_${P}
+#             mv CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
+#             mv CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
+#             cd ..
+#         fi
+#         #rename dirs with year code
+#         if [ -f "23CBH_${P}/23CBH_${P}_1.fq.gz" ]; then
+#             echo "renaming fastq"
+#             cd 23CBH_${P}
+#             mv 23CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
+#             mv 23CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
+#             cd ..
+#         fi    
 
     #ipyrad
         cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
         #first step: demultiplexing
-        ipyrad -p params-23CBH_${P}.txt -s 234 -c $SLURM_NTASKS -d -f --MPI
+        ipyrad -p params-23CBH_${P}.txt -s 5 -c $SLURM_NTASKS -d -f --MPI
             #s1 8 cores * 10GB work, not minimum
                 #time: 2:55
             #s1-5 8 cores * 10 GB (48 CPU): basically 1 day
