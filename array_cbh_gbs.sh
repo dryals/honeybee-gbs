@@ -124,8 +124,7 @@ do
                 #does this really require 6gb?
                 #time for one plate: 
                 #consider GATK if this becomes unmanageable 
-                    #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
-                    #try adjusting params 14 for quicker s6
+
                     #
                 #8 cores * 8Gb and old params: ~ 650 min consesus calling
                 #10 cores *6Gb and new params: ~4hrs s5
