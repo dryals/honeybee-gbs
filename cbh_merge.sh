@@ -3,8 +3,8 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
-#SBATCH --mem-per-cpu=10G
+#SBATCH --ntasks=30
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -53,11 +53,13 @@ echo "launching ipyrad..."
    ipyrad -p params-varcalltest.txt -s 67 -c $SLURM_NTASKS -d -f --MPI
    
    
-   #trying 10GB by 24cores
+    #trying 10GB by 24cores
+        #try with 6GB, might run faster...
         #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
         #try adjusting params 14 for quicker s6
    
-   #old
+  
+  #old
     
     #18 cores * 11Gb seems to work ... 
         #try changing params to make consensus calls (s5) faster?
