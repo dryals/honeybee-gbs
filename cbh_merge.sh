@@ -53,8 +53,7 @@ echo "launching ipyrad..."
    ipyrad -p params-varcalltest.txt -s 67 -c $SLURM_NTASKS -d -f --MPI
    
    
-    #trying 10GB by 24cores
-        #try with 6GB, might run faster...
+    #trying 6GB by 30cores
         #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
         #try adjusting params 14 for quicker s6
    
