@@ -106,8 +106,9 @@ do
 
     #ipyrad
         cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
-        #first step: demultiplexing
         ipyrad -p params-23CBH_${P}.txt -s 5 -c $SLURM_NTASKS -d -f --MPI
+        
+        
             #s1 8 cores * 10GB work, not minimum
                 #time: 2:55
             #s1-5 8 cores * 10 GB (48 CPU): basically 1 day
@@ -120,11 +121,14 @@ do
                 #then merge everything at s2 and go from there with max cores... easiest to manage?
                 
             #extending parallel processing wtihin plates to s5
-                #does this really require 8gb?
+                #does this really require 6gb?
                 #time for one plate: 
                 #consider GATK if this becomes unmanageable 
-                #8 cores * 8Gb and old params: 4% @ 26 min consesus calling
-                #10 cores *6Gb and new params: 
+                    #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
+                    #try adjusting params 14 for quicker s6
+                    #
+                #8 cores * 8Gb and old params: ~ 650 min consesus calling
+                #10 cores *6Gb and new params: ~4hrs s5
 
                 
     echo "    finished plate ${P}" >> $log
