@@ -50,7 +50,7 @@ echo "launching ipyrad..."
     #WARNING: ensure the correct param file is used! edit if needed after merging...
 
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
-#     ipyrad -p params-varcalltest.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
+    ipyrad -p params-varcalltest.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
    
     #branch, remove samples, and output vcf
     ipyrad -p params-varcalltest.txt -b varcallfinal - 23CBH193_4 23CBH149_2 23CBH323_4 23CBH224_1 \
