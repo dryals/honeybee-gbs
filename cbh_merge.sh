@@ -3,8 +3,8 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
-#SBATCH --mem-per-cpu=10G
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=12G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -60,7 +60,8 @@ echo "launching ipyrad..."
     
     #s7 froze at 33% completion, trying with 
     #s7 also errors at 8G * 24 cores: ipyparallel.error.EngineError: Engine b'98b61bdc-b5e555fd93b43e8c2ec98921' died while running task '03985a02-0d72077978c48d97fcac8e00_1845710_144'
-    #trying 10G * 20cores
+    #trying 10G * 20cores ... fail
+    #tryin 12G * 16 cores 
    
     #trying 6GB by 30cores
         #s6 works

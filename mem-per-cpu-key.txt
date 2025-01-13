@@ -1,3 +1,4 @@
 6G = 4 cores
 8G = 5 cores
 10G = 6 cores
+12G = 7 cores
