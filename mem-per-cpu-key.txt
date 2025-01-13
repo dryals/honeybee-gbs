@@ -2,3 +2,7 @@
 8G = 5 cores
 10G = 6 cores
 12G = 7 cores
+14
+16
+18
+20 = 11 cores
