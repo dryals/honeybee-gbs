@@ -3,8 +3,8 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=11
-#SBATCH --mem-per-cpu=20G
+#SBATCH --ntasks=8
+#SBATCH --mem-per-cpu=30G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -67,6 +67,7 @@ echo "launching ipyrad..."
     #tryin 12G * 16 cores ... fail
     #14G * 15 cores ... fail
     #20G * 11 cores ...
+        #try adjusting filters to decrease memory usage on s7... or GATK...
    
     #s6 works with 6GB by 30cores
         #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
