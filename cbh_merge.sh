@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=16
-#SBATCH --mem-per-cpu=12G
+#SBATCH --mem-per-cpu=14G
 #SBATCH --time=7-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -56,6 +56,9 @@ echo "launching ipyrad..."
 #     ipyrad -p params-varcalltest.txt -b varcallfinal - 23CBH193_4 23CBH149_2 23CBH323_4 23CBH224_1 \
 #         23CBH183_5 23CBH347_2 23CBH121_1 23CBH196_6 23CBH335_6 23CBH344_8
 #    
+    
+    #remove '23CBH193_4', '23CBH149_2', '23CBH323_4', '23CBH224_1', '23CBH183_5', '23CBH347_2', '23CBH121_1', '23CBH196_6', '23CBH335_6', '23CBH344_8'
+   
     ipyrad -p params-varcallfinal.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
     
     #s7 froze at 33% completion, trying with 
@@ -63,13 +66,11 @@ echo "launching ipyrad..."
     #trying 10G * 20cores ... fail
     #tryin 12G * 16 cores 
    
-    #trying 6GB by 30cores
-        #s6 works
+    #s6 works with 6GB by 30cores
         #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
         #try adjusting params 14 for quicker s6
         
-        #remove '23CBH193_4', '23CBH149_2', '23CBH323_4', '23CBH224_1', '23CBH183_5', '23CBH347_2', '23CBH121_1', '23CBH196_6', '23CBH335_6', '23CBH344_8'
-   
+       
   
   #old
     
