@@ -1,15 +1,5 @@
-6G = 4 cores
-8G = 5 cores
-10G = 6 cores
-12G = 7 cores
-14
-16
-18
-20 = 11 cores
-22
-24
-26
-28
-30 = 16c
-40 = 21c
-50 = 26c
+standard:
+XGb = (X/2)+1 cores
+
+high mem:
+XGb = X/8 cores 
