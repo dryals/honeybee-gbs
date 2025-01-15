@@ -3,7 +3,7 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=14
+#SBATCH --ntasks=12
 #SBATCH --mem-per-cpu=16G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
@@ -63,7 +63,7 @@ echo "launching ipyrad..."
     
     #trying wiht 32GB * 8 cores, maybe the architecture makes a difference?
         #this works, but takes barely > 1 day
-        #trying 16GB * 16 cores ... 
+        #trying 16GB * 14 cores ... 
 
 echo "-------------"
 echo "done"
