@@ -59,6 +59,9 @@ echo "launching ipyrad..."
     
     #remove '23CBH193_4', '23CBH149_2', '23CBH323_4', '23CBH224_1', '23CBH183_5', '23CBH347_2', '23CBH121_1', '23CBH196_6', '23CBH335_6', '23CBH344_8'
    
+   
+   #remove samples with too few clusters before s6 ...
+   
     ipyrad -p params-varcallfinal.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
     
     #s7 froze at 33% completion, trying with 

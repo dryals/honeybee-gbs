@@ -11,10 +11,13 @@ library(purrr)
 #TODO: remove sites with narrow probabilities 
 
 #using joint likelihood of het and hom proportions of workers
+
+#simulation: error of real genotypes
 lsim = function(p, qg){
+  if(qg == 2) rqg = c(1,1)
   if(qg == 1) rqg = c(0,1)
   if(qg == 0) rqg = c(0,0)
-  if(qg == 2) rqg = c(1,1)
+  
   
   # rqg = c(1,0)
   # p = 0.8
@@ -32,26 +35,20 @@ lsim = function(p, qg){
     swg = sample(rqg, nworker, replace = T) + 
       sample(c(1,0), nworker, prob = c(p, 1-p), replace = T)
     
-    swg.grid = data.frame(w2 = sum(swg == 2) / (nworker),
-                          w1 = sum(swg == 1) / (nworker),
-                          w0 = sum(swg == 0) / (nworker))
+    #w2, w1, w0
+    swg.counts = c(sum(swg == 2), sum(swg == 1), sum(swg == 0))
     
-    #total likelihood of q0
-    lq0 = dbinom(sum(swg == 0), nworker, qgl['q0', 'w0']) *
-          dbinom(sum(swg == 1), nworker, qgl['q0', 'w1']) *
-          dbinom(sum(swg == 2), nworker, qgl['q0', 'w2']) 
-    
-    #total likelihood of q1
-    lq1 = dbinom(sum(swg == 0), nworker, qgl['q1', 'w0']) *
-          dbinom(sum(swg == 1), nworker, qgl['q1', 'w1']) *
-          dbinom(sum(swg == 2), nworker, qgl['q1', 'w2']) 
-    
-    #total likelihood of q2
-    lq2 = dbinom(sum(swg == 0), nworker, qgl['q2', 'w0']) *
-          dbinom(sum(swg == 1), nworker, qgl['q2', 'w1']) *
-          dbinom(sum(swg == 2), nworker, qgl['q2', 'w2']) 
-    
-    call[i] = c("q0", "q1", "q2")[which.max(c(lq0, lq1, lq2))]
+    #multinomial
+      #lik of q2
+      lq2 = dmultinom(swg.counts, nworker, as.numeric(qgl[1,]))
+      #likelihood of q1
+      lq1 = dmultinom(swg.counts, nworker, as.numeric(qgl[2,]))
+      #lik of q0
+      lq0 = dmultinom(swg.counts, nworker, as.numeric(qgl[3,]))
+      
+      #c(lq2, lq1, lq0)
+
+    call[i] = c("q2", "q1", "q0")[which.max(c(lq2, lq1, lq0))]
   }
   
   if(qg == 0) return(sum(call != "q0") / length(call))
@@ -77,6 +74,79 @@ ggplot(plotdb.long) +
   theme_bw() + 
   labs(y = "error rate", x = "pop'n allele freq", color = "real queen\ngenotype")
 
+
+
+#simulation2: error of called genotypes given p
+lsim2 = function(p, qg){
+  if(qg == 2) rqg = c(1,1)
+  if(qg == 1) rqg = c(0,1)
+  if(qg == 0) rqg = c(0,0)
+  
+  
+  # rqg = c(1,0)
+  # p = 0.8
+  reps = 2000
+  nworker = 8
+  #queen genotype likelihood
+  qgl = data.frame("w2" = c(p, p/2, 0), 
+                   "w1" = c(1-p, 1/2, p), 
+                   "w0" = c(0, (1-p)/2, 1-p))
+  rownames(qgl) = c("q2", "q1", "q0")
+  
+  #simulate workers
+  call = rep(NA, reps)
+  for(i in 1:reps){
+    swg = sample(rqg, nworker, replace = T) + 
+      sample(c(1,0), nworker, prob = c(p, 1-p), replace = T)
+    
+    #w2, w1, w0
+    swg.counts = c(sum(swg == 2), sum(swg == 1), sum(swg == 0))
+    
+    #multinomial
+    #lik of q2
+    lq2 = dmultinom(swg.counts, nworker, as.numeric(qgl[1,]))
+    #likelihood of q1
+    lq1 = dmultinom(swg.counts, nworker, as.numeric(qgl[2,]))
+    #lik of q0
+    lq0 = dmultinom(swg.counts, nworker, as.numeric(qgl[3,]))
+    
+    #c(lq2, lq1, lq0)
+    
+    call[i] = c("q2", "q1", "q0")[which.max(c(lq2, lq1, lq0))]
+  }
+  
+  out = data.frame(q2 = sum(call == "q2"),
+                   q1 = sum(call == "q1"),
+                   q0 = sum(call =="q0"))
+  return(out)
+} 
+
+#run for a range of p and each genotype
+s = seq(0, 1, 0.1)
+
+plotdb2 = rbind(s |> map_dfr(lsim2, qg = 2),
+                s |> map_dfr(lsim2, qg = 1),
+                s |> map_dfr(lsim2, qg = 0))
+  plotdb2$p = rep(s, 3)
+  plotdb2$rqg = c(rep(2, length(s)), rep(1, length(s)), rep(0, length(s)))
+
+#pivot and plot
+plotdb2.long = plotdb2 %>% 
+  pivot_longer(cols = starts_with("q"), names_to = "calledGT") %>% 
+  mutate(rqg = as.character(rqg))
+  plotdb2.long$calledGT = gsub("q", "", plotdb2.long$calledGT)
+  
+  plotdb2.long$error = (plotdb2.long$rqg != plotdb2.long$calledGT)
+
+  sim2 = plotdb2.long %>% group_by(p, calledGT, error) %>% 
+    summarise(count = sum(value)) %>% 
+    pivot_wider(names_from = error, values_from = count) %>% 
+    mutate(error_rate = `TRUE` / (`FALSE` + `TRUE`))
+  
+  ggplot(sim2, aes(x = p, y = error_rate, color = calledGT)) +
+    geom_line(size = 2) + 
+    theme_bw()
+  
 
 
 #likelihood cutoff will work, but will bias towards homozygous sites and 
