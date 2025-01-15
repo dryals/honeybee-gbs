@@ -3,7 +3,7 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=16
+#SBATCH --ntasks=14
 #SBATCH --mem-per-cpu=16G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
@@ -62,8 +62,8 @@ echo "launching ipyrad..."
     ipyrad -p params-varcallfinal.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
     
     #trying wiht 32GB * 8 cores, maybe the architecture makes a difference?
-        #this seems to be working!
-        #now try decreasing mem and increasing number of cores... try to optimize for popgen work
+        #this works, but takes barely > 1 day
+        #trying 16GB * 16 cores ... 
 
 echo "-------------"
 echo "done"
