@@ -46,7 +46,7 @@ lsim = function(p, qg){
       #lik of q0
       lq0 = dmultinom(swg.counts, nworker, as.numeric(qgl[3,]))
       
-      #c(lq2, lq1, lq0)
+      c(lq2, lq1, lq0)
 
     call[i] = c("q2", "q1", "q0")[which.max(c(lq2, lq1, lq0))]
   }
@@ -76,7 +76,16 @@ ggplot(plotdb.long) +
 
 
 
+
+
+
+
 #simulation2: error of called genotypes given p
+  #i think this only holds if there are equal probablilities of 
+  #q0,q1,q2, which is not a good assumption
+  #I could change the simulation to also choose a queen gt based on p
+  #but is that a good assumption?
+
 lsim2 = function(p, qg){
   if(qg == 2) rqg = c(1,1)
   if(qg == 1) rqg = c(0,1)
