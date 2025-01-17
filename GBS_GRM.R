@@ -3,9 +3,35 @@ library(tidyverse)
 library(vcfR)
 library(purrr)
 
+#read files
+  #read in VCF
+  
+  #read in sample names
+  
+  #read in pedigree
 
 
-#theoretical
+#create object for queen and worker group gt
+
+#loop through sites
+  #calculate allele freq
+  #loop through colonies
+    #pull workers
+    #estimate queen gt and error
+      #multinomial max likelihood
+    #calculate average worker gt
+
+#write object 
+  #???
+
+#calculate A matrix
+  #???
+
+
+
+
+#Theoretical Sim
+#####
 
 
 #TODO: remove sites with narrow probabilities 
@@ -234,3 +260,4 @@ bag13 = 1
 
 
 #calculate worker group GRM
+
