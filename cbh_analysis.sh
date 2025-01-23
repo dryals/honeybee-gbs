@@ -24,7 +24,8 @@ rename=/home/dryals/ryals/admixPipeline/chrsrename.txt
 chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
 
-#pull a small file for testing
+#sort and filter vcf
+    #this is probably too many steps :/
     cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
     echo "sorting input..."
     #sort the input
@@ -42,13 +43,22 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     echo "filtering input..."
     #filter the input
         #remove low-qual samples and drones
-        bcftools view 23CBH.bcf.gz -S -q 0.01:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
+        bcftools view 23CBH.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
             -Ob -o 23CBH-filter.bcf.gz
         bcftools index -c 23CBH-filter.bcf.gz
         
-        #pull one chr for testing
-        bcftools view 23CBH-filter.bcf.gz -r 11 -Ov -o 23CBH-small.vcf
+        #pull vcf
+        bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
         
+        #pull sample names
+        grep "#CHROM" -m 1 23CBH.vcf > header.txt
+        
+        
+    echo "calculataing allele freqs..."
+        bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+            bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
+    
+    
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
 #         bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth

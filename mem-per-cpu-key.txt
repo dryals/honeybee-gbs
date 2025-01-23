@@ -1,5 +1,0 @@
-standard:
-XGb = (X/2)+1 cores
-
-high mem:
-XGb = X/8 cores 

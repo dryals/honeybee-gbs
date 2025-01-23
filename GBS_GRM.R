@@ -5,26 +5,148 @@ library(purrr)
 
 #read files
   #read in VCF
+  vcf.raw = read.vcfR("data/23CBH-filter.vcf")
+  
+  gt = extract.gt(vcf.raw)
+  gt2 = gt
+  for (i in 1:nrow(gt)){
+    for (j in 1:ncol(gt)){
+      gt2[i,j] = str_count(gt[i,j], "1")
+    }
+  }
+  gt2 = as.data.frame(gt2)
+
   
   #read in sample names
+  samples = read.delim("data/header.txt", header = F) %>% t() %>% 
+    as.data.frame() %>% 
+    rename(sample_id = 1) %>% 
+    filter(grepl("23CBH", sample_id)) %>% 
+    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+           colony_id = gsub("23CBH", "", queen_id)) 
   
   #read in pedigree
+  pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
+    mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
+  samples = samples %>% left_join(pheno %>% select(colony_id, breeder))
+  
+  #create representative sample
+  set.seed(123)
+  balance = samples %>% group_by(breeder) %>% 
+    summarise(colony_id = unique(colony_id)) %>% 
+    slice_sample(n = 10) %>% 
+    left_join(samples)
+  
+  #write out for analysis
+  write.table(balance$sample_id, file = "data/balanceSet.txt",
+              quote = F, row.names = F, col.names = F)
+  
+  #calculate allele freq for representative sample
+  #read in allele frequencies ...
+  af = read.delim("data/23CBH.frq", header = F) 
+    colnames(af) = c("chr", "pos", "f")
+    #af = af %>% filter(chr == 11)
+  
+  
+  
+#TODO: fix missing breeders and 16workers from some colonies
+
+#colony diversity
+#####
+    
+  #TODO: double check sd and dist calculations...
+      
+  #define distance function
+      cd = function(x){
+        #cd of each site
+        cdm = rep(NA, nrow(x))
+        for(l in 1:nrow(x)){
+          cdm[l] = mean(dist(t(x[l,])), na.rm = T)
+        }
+        return(mean(cdm, na.rm = T))
+      }
+  #create object
+    coldiv = data.frame(queen_id = unique(samples$queen_id), sd.gt = NA, 
+                        dist.gt = NA)
+  #loop through colonies
+    for(i in 1:nrow(coldiv)){
+      #gather all relevant genotypes
+      c = coldiv$queen_id[i]
+      cgt = gt2[,grepl(c, names(gt2))]
+      #sd of genotype
+      coldiv$sd.gt[i] = mean(
+                              apply(cgt, 1, function(x){sd(x, na.rm = T)}),
+                              na.rm = T)
+      #genoytpe distance
+      coldiv$dist.gt[i] = cd(cgt)
+    }    
+    
+    hist(coldiv$sd.gt)
+    plot(coldiv$sd.gt, coldiv$dist.gt)
+      
+    #write_csv(coldiv, file = "data/coldiv.csv")
+    
+    
+    
+  #quickly check against phenos ... 
+    pheno$queen_id = paste0("23CBH", pheno$colony_id)
+    pheno = pheno %>% left_join(coldiv)
+    sum(!is.na(pheno$dist.gt))
+    
+    pheno.f = pheno %>% 
+      filter(!is.na(dist.gt), !is.na(pattern)) %>% 
+      mutate(apiary_id = as.character(apiary_id))
+    
+    mod = lm(honey ~ apiary_id + established + breeder,  data = pheno.f)
+    
+    test = data.frame(resid = mod$residuals, dist = pheno.f$dist.gt)
+    
+    #randomize for fun
+    #test$resid = rnorm(nrow(test), 0, 1)
+    
+    plot(test$dist, test$resid)
+    
+    #bins
+    se = function(x) sd(x) / sqrt(length(x))
+    test = test %>% 
+      mutate(bins = cut(dist, 
+                        breaks = seq(min(dist) - 0.01, max(dist), length.out = 12))) 
+    
+    plot(test$bins, test$resid)
+    
+    test.sum = test %>% group_by(bins) %>% 
+    summarise(mean = mean(resid),
+              sd = sd(resid),
+              n = n()) %>% 
+      filter(n > 10)
+    
+    ggplot(test.sum, aes(x = bins, y = sd)) + geom_point()
+    
 
 
+#queen and average worker gt
+#####
 #create object for queen and worker group gt
+      qgt = matrix(nrow = nrow(af), ncol = length(unique(samples$queen_id))) %>% 
+        as.data.frame
+        colnames(qgt) = unique(samples$queen_id)
+      wgt = qgt
 
 #loop through sites
-  #calculate allele freq
+for (i in (1:nrow(qgt))){
+  
   #loop through colonies
     #pull workers
-    #estimate queen gt and error
+    #estimate queen gt and error accounting for missing genotypes (require 5 non-missing)
       #multinomial max likelihood
     #calculate average worker gt
 
+  
+}
 #write object 
-  #???
+  #??? maybe beagle format?
 
-#calculate A matrix
+#calculate the A matrix
   #???
 
 
