@@ -3,7 +3,7 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=10
+#SBATCH --ntasks=12
 #SBATCH --mem-per-cpu=30G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
