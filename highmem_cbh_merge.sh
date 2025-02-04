@@ -11,7 +11,7 @@
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
 
 #Dylan Ryals 09 DEC 2024
-#last edited 14 JAN 2025
+#last edited 4 FEB 2025
 
 date
 
@@ -51,15 +51,15 @@ echo "launching ipyrad..."
 
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
 #     ipyrad -p params-varcalltest.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
-#    
+# 
+#     rcall=$( cat ~/ryals/honeybee-gbs/data/toremove.txt | tr '\n' ' ' )
+# 
 #     #branch, remove samples, and output vcf
-#     ipyrad -p params-varcalltest.txt -b varcallfinal - 23CBH193_4 23CBH149_2 23CBH323_4 23CBH224_1 \
-#         23CBH183_5 23CBH347_2 23CBH121_1 23CBH196_6 23CBH335_6 23CBH344_8
-#    
-    
-    #remove '23CBH193_4', '23CBH149_2', '23CBH323_4', '23CBH224_1', '23CBH183_5', '23CBH347_2', '23CBH121_1', '23CBH196_6', '23CBH335_6', '23CBH344_8'
-   
-    ipyrad -p params-varcallfinal.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+#     ipyrad -p params-varcalltest.txt -b varcallfinal2 - $rcall
+#     
+#     #edit param file ...
+
+    ipyrad -p params-varcallfinal2.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
     
     #trying wiht 32GB * 8 cores, maybe the architecture makes a difference?
         #this works, but takes barely > 1 day

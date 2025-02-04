@@ -4,6 +4,54 @@ library(vcfR)
 library(purrr)
 
 #read files
+  #read in sample names
+  samples = read.delim("data/header.txt", header = F) %>% t() %>% 
+    as.data.frame() %>% 
+    rename(sample_id = 1) %>% 
+    filter(grepl("23CBH", sample_id)) %>% 
+    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+           colony_id = gsub("23CBH", "", queen_id)) 
+  
+  #select samples to remove
+  s5 = read.delim("data/s5summary.txt", sep = "")
+  
+  s5$bad = (is.nan(s5$nsites) | s5$nsites == 0 |
+              s5$reads_consens < 2e4)
+  s5$sample_id = rownames(s5)
+  s5 = s5 %>% select(sample_id, reads_consens, nsites, bad)
+  #add sample info
+  s5 = s5 %>% 
+    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+           colony_id = gsub("23CBH", "", queen_id)) 
+  
+  s5.sum = s5 %>% group_by(colony_id) %>% 
+    summarise(nbad = sum(bad))
+  
+  hist(s5$reads_consens)
+  hist(s5.sum$nbad)
+  
+  sum(s5$reads_consens[!s5$bad], na.rm = T)
+  
+  #output for removal
+  s5.remove = as.character(s5$sample_id[s5$bad])
+  write.table(s5.remove, "data/toremove.txt", quote = F,
+              row.names = F, col.names = F)
+  
+  #sample threshold for 90% complete data?
+  sum(!s5$bad) * 0.90
+  
+  
+  
+  
+  
+  hist(s5$reads_consens)
+  hist(s5$nsites)
+  
+  plot(s5$nsites, s5$reads_consens)
+  
+  sum(s5$reads_consens < 3e4, na.rm = T)
+  sum(s5$nsites < 5e6, na.rm = T)
+  
   #read in VCF
   vcf.raw = read.vcfR("data/23CBH-filter.vcf")
   
@@ -15,15 +63,8 @@ library(purrr)
     }
   }
   gt2 = as.data.frame(gt2)
-
   
-  #read in sample names
-  samples = read.delim("data/header.txt", header = F) %>% t() %>% 
-    as.data.frame() %>% 
-    rename(sample_id = 1) %>% 
-    filter(grepl("23CBH", sample_id)) %>% 
-    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
-           colony_id = gsub("23CBH", "", queen_id)) 
+  
   
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
@@ -47,7 +88,8 @@ library(purrr)
     colnames(af) = c("chr", "pos", "f")
     #af = af %>% filter(chr == 11)
   
-  
+    
+
   
 #TODO: fix missing breeders and 16workers from some colonies
 
