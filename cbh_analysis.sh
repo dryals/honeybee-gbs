@@ -54,8 +54,10 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     echo "filtering input..."
     #filter the input
         #remove missing, keep all alleles (no MAF filter)
-        bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
-            -Ob -o 23CBH-filter.bcf.gz
+        bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
+            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+            --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
+            
         bcftools index -c 23CBH-filter.bcf.gz
         
         #TODO: remove mito
