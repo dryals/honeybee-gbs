@@ -60,7 +60,7 @@ select = dplyr::select
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
     mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
-  samples = samples %>% left_join(pheno %>% select(colony_id, breeder))
+  samples = samples %>% left_join(pheno %>% select(colony_id, breeder, apiary_id))
   
   #create representative sample: 10 colonies from each breeder
     #TODO: consider locations??
@@ -270,7 +270,8 @@ for (i in (1:nrow(qgt))){
   
   #remoake filtered list
   relid.f = data.frame(queen_id = rownames(relmat)) %>% 
-    left_join(relid %>% select(queen_id = V2, breeder = V1))
+    left_join(relid %>% select(queen_id = V2, breeder = V1)) %>% 
+    left_join(samples %>% select(queen_id, apiary_id), multiple = 'first')
   
   hist(relmat[lower.tri(relmat, diag = T)])
   hist(relmat[lower.tri(relmat, diag = T)])
@@ -278,12 +279,16 @@ for (i in (1:nrow(qgt))){
   table(relid.f$breeder)
   
   relid.f$color = 'gray'
+  
+    # relid.f$color[relid.f$apiary_id == 14] = 'blue'
+    # relid.f$color[relid.f$apiary_id == 17] = 'green'
+  
     relid.f$color[relid.f$breeder == "II87"] = 'red'
     relid.f$color[relid.f$breeder == "BQ02"] = 'orange'
     relid.f$color[relid.f$breeder == "I69"] = 'blue'
     relid.f$color[relid.f$breeder == "BQ04"] = 'green'
     relid.f$color[relid.f$breeder == "BQ03"] = 'yellow'
-  
+    
   
   heatmap(relmat, ColSideColors = relid.f$color)
   
