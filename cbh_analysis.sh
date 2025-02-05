@@ -3,7 +3,7 @@
 # FILENAME: cbh_analysis.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=16
+#SBATCH --ntasks=8
 #SBATCH --time=05:00:00
 #SBATCH --job-name gbs_analysis
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/analysis_cbh.out
@@ -25,14 +25,15 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
 
 
-#select samples to remove
-cd $CLUSTER_SCRATCH/gbs/23CBH
+# #select samples to remove
+# cd $CLUSTER_SCRATCH/gbs/23CBH
+# 
+# 
+# head -n 1 23CBH_1/*consens/s5* > s5summary.txt
+# sed -s 1d  */*consens/s5* >> s5summary.txt
 
-
-head -n 1 23CBH_1/*consens/s5* > s5summary.txt
-sed -s 1d  */*consens/s5* >> s5summary.txt
-
-
+#move results into working directory
+    #...
 
 #sort and filter vcf
     #this is probably too many steps :/
@@ -52,8 +53,8 @@ sed -s 1d  */*consens/s5* >> s5summary.txt
         
     echo "filtering input..."
     #filter the input
-        #remove low-qual samples and drones
-        bcftools view 23CBH.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
+        #remove missing, keep all alleles (no MAF filter)
+        bcftools view 23CBH.bcf.gz -M2 -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
             -Ob -o 23CBH-filter.bcf.gz
         bcftools index -c 23CBH-filter.bcf.gz
         
@@ -64,11 +65,11 @@ sed -s 1d  */*consens/s5* >> s5summary.txt
         grep "#CHROM" -m 1 23CBH.vcf > header.txt
         
         
-    echo "calculataing allele freqs..."
-        bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
-            bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
-    
-    
+#     echo "calculataing allele freqs..."
+#         bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+#             bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
+#     
+#     
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
 #         bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth

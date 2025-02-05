@@ -27,73 +27,60 @@ library(purrr)
   s5.sum = s5 %>% group_by(colony_id) %>% 
     summarise(nbad = sum(bad))
   
-  hist(s5$reads_consens)
-  hist(s5.sum$nbad)
-  
-  sum(s5$reads_consens[!s5$bad], na.rm = T)
-  
-  #output for removal
-  s5.remove = as.character(s5$sample_id[s5$bad])
-  write.table(s5.remove, "data/toremove.txt", quote = F,
-              row.names = F, col.names = F)
-  
-  #sample threshold for 90% complete data?
-  sum(!s5$bad) * 0.90
-  
-  
-  
-  
-  
-  hist(s5$reads_consens)
-  hist(s5$nsites)
-  
-  plot(s5$nsites, s5$reads_consens)
-  
-  sum(s5$reads_consens < 3e4, na.rm = T)
-  sum(s5$nsites < 5e6, na.rm = T)
+  # hist(s5$reads_consens)
+  # hist(s5.sum$nbad)
+  # 
+  # sum(s5$reads_consens[!s5$bad], na.rm = T)
+  # 
+  # #output for removal
+  # s5.remove = as.character(s5$sample_id[s5$bad])
+  # write.table(s5.remove, "data/toremove.txt", quote = F,
+  #             row.names = F, col.names = F)
+  # 
+  # #sample threshold for 90% complete data?
+  # sum(!s5$bad) * 0.90
   
   #read in VCF
   vcf.raw = read.vcfR("data/23CBH-filter.vcf")
   
-  gt = extract.gt(vcf.raw)
-  gt2 = gt
-  for (i in 1:nrow(gt)){
-    for (j in 1:ncol(gt)){
-      gt2[i,j] = str_count(gt[i,j], "1")
-    }
-  }
-  gt2 = as.data.frame(gt2)
-  
-  
+  #convert to dosage
+    gt = extract.gt(vcf.raw)
+    
+    gt2 = gt
+      gt2[gt == "0/0"] = "0"
+      gt2[gt2 == "1/1"] = "2"
+      gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
+      gt2 = as.data.frame(gt2)
+      
+    rm(gt, vcf.raw)
   
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
     mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
   samples = samples %>% left_join(pheno %>% select(colony_id, breeder))
   
-  #create representative sample
-  set.seed(123)
-  balance = samples %>% group_by(breeder) %>% 
-    summarise(colony_id = unique(colony_id)) %>% 
-    slice_sample(n = 10) %>% 
-    left_join(samples)
+  # #create representative sample
+  # set.seed(123)
+  # balance = samples %>% group_by(breeder) %>% 
+  #   summarise(colony_id = unique(colony_id)) %>% 
+  #   slice_sample(n = 10) %>% 
+  #   left_join(samples)
+  # 
+  # #write out for analysis
+  # write.table(balance$sample_id, file = "data/balanceSet.txt",
+  #             quote = F, row.names = F, col.names = F)
+  # 
+  # #calculate allele freq for representative sample
   
-  #write out for analysis
-  write.table(balance$sample_id, file = "data/balanceSet.txt",
-              quote = F, row.names = F, col.names = F)
-  
-  #calculate allele freq for representative sample
   #read in allele frequencies ...
   af = read.delim("data/23CBH.frq", header = F) 
     colnames(af) = c("chr", "pos", "f")
     #af = af %>% filter(chr == 11)
   
     
-
-  
 #TODO: fix missing breeders and 16workers from some colonies
 
-#colony diversity
+#colony diversity  
 #####
     
   #TODO: double check sd and dist calculations...
@@ -175,21 +162,74 @@ library(purrr)
       wgt = qgt
 
 #loop through sites
+      #could also be coded by creating one new obj for each step...
+        #takes like 20min with 7k sites
+      #TODO: possible to call one queen allele if not both???
 for (i in (1:nrow(qgt))){
   
-  #loop through colonies
-    #pull workers
-    #estimate queen gt and error accounting for missing genotypes (require 5 non-missing)
-      #multinomial max likelihood
-    #calculate average worker gt
-
+  p = af$f[i]
+  #queen genotype likelihood
+  qgl = data.frame("w2" = c(p, p/2, 0), 
+                   "w1" = c(1-p, 1/2, p), 
+                   "w0" = c(0, (1-p)/2, 1-p))
+  rownames(qgl) = c("q2", "q1", "q0")
   
+  #loop through colonies
+  for (c in colnames(qgt)){
+    #pull workers
+    cworkers.cols = grepl(c, colnames(gt2))
+    #estimate queen gt and error accounting for missing genotypes
+    cworkers.gt = as.numeric(gt2[i, cworkers.cols])
+      cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
+    nworker = length(cworkers.gt)
+    #require 5 non-missing
+    if(nworker < 6){
+      qgt[i, c] = NA
+      next
+    }
+    cworkers.counts = c(sum(cworkers.gt == 2), 
+                        sum(cworkers.gt == 1), 
+                        sum(cworkers.gt == 0))
+    #multinomial
+      #lik of q2
+      lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
+      #likelihood of q1
+      lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
+      #lik of q0
+      lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
+      
+      qgt[i, c] = c(2, 1, 0)[which.max(c(lq2, lq1, lq0))]
+    
+    #TODO: calculate average worker gt
+  }
 }
 #write object 
-  #??? maybe beagle format?
+  #write queen for plink .ped
+    pt1 = data.frame(IID = names(qgt)) %>% 
+      left_join(samples %>% select(IID = queen_id, FID = breeder), multiple = 'first') %>% 
+      mutate(FID = gsub("-", "", FID)) %>% 
+      select(FID, IID) %>% 
+      mutate(father = 0, mother = 0, sex = 2, pheno = 0)
+    
+    pt2 = t(qgt)
+      pt2[pt2 == 0] = "TT"
+      pt2[pt2 == 1] = "AT"
+      pt2[pt2 == 2] = "AA"
+      pt2[is.na(pt2)] = "00"
+      
+    
+    qgt.out = cbind(pt1, pt2)
+    
+    write.table(qgt.out, "data/qgt.ped", 
+                row.names = F, col.names = F, quote = F, sep = " ")
+    #TODO: write .map file
+    
+  #TODO: write worker
+    #??? maybe beagle format?
 
 #calculate the A matrix
-  #???
+  #this should be checked against the pedigree!
+  # 
 
 
 
@@ -410,18 +450,3 @@ plotdb2.long = plotdb2 %>%
 #   geom_line(aes(x = p, y = q1), color = 'blue') + 
 #   geom_line(aes(x = p, y = q2), color = 'red') +
 #   theme_bw()
-
-
-
-  
-#read in test data
-bag13 = 1
-  
-#calculate queen GRM
-  #calculate queen genotype
-    #split into sister groups
-    #
-
-
-#calculate worker group GRM
-
