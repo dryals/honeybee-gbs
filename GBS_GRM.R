@@ -3,6 +3,8 @@ library(tidyverse)
 library(vcfR)
 library(purrr)
 
+select = dplyr::select
+
 #read files
   #read in sample names
   samples = read.delim("data/header.txt", header = F) %>% t() %>% 
@@ -12,21 +14,21 @@ library(purrr)
     mutate(queen_id = gsub("_[0-9]*", "", sample_id),
            colony_id = gsub("23CBH", "", queen_id)) 
   
-  #select samples to remove
-  s5 = read.delim("data/s5summary.txt", sep = "")
-  
-  s5$bad = (is.nan(s5$nsites) | s5$nsites == 0 |
-              s5$reads_consens < 2e4)
-  s5$sample_id = rownames(s5)
-  s5 = s5 %>% select(sample_id, reads_consens, nsites, bad)
-  #add sample info
-  s5 = s5 %>% 
-    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
-           colony_id = gsub("23CBH", "", queen_id)) 
-  
-  s5.sum = s5 %>% group_by(colony_id) %>% 
-    summarise(nbad = sum(bad))
-  
+  # #select samples to remove
+  # s5 = read.delim("data/s5summary.txt", sep = "")
+  # 
+  # s5$bad = (is.nan(s5$nsites) | s5$nsites == 0 |
+  #             s5$reads_consens < 2e4)
+  # s5$sample_id = rownames(s5)
+  # s5 = s5 %>% select(sample_id, reads_consens, nsites, bad)
+  # #add sample info
+  # s5 = s5 %>% 
+  #   mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+  #          colony_id = gsub("23CBH", "", queen_id)) 
+  # 
+  # s5.sum = s5 %>% group_by(colony_id) %>% 
+  #   summarise(nbad = sum(bad))
+  # 
   # hist(s5$reads_consens)
   # hist(s5.sum$nbad)
   # 
@@ -53,29 +55,50 @@ library(purrr)
       gt2 = as.data.frame(gt2)
       
     rm(gt, vcf.raw)
+    
   
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
     mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
   samples = samples %>% left_join(pheno %>% select(colony_id, breeder))
   
-  # #create representative sample
-  # set.seed(123)
-  # balance = samples %>% group_by(breeder) %>% 
-  #   summarise(colony_id = unique(colony_id)) %>% 
-  #   slice_sample(n = 10) %>% 
-  #   left_join(samples)
-  # 
-  # #write out for analysis
-  # write.table(balance$sample_id, file = "data/balanceSet.txt",
-  #             quote = F, row.names = F, col.names = F)
-  # 
-  # #calculate allele freq for representative sample
+  #create representative sample: 10 colonies from each breeder
+    #TODO: consider locations??
+  set.seed(123)
+  balance = samples %>% group_by(breeder) %>%
+    summarise(colony_id = unique(colony_id)) %>%
+    slice_sample(n = 10) %>%
+    left_join(samples)
+
+  #write out for analysis
+  write.table(balance$sample_id, file = "data/balanceSet.txt",
+              quote = F, row.names = F, col.names = F)
+
+  #calculate allele freq for representative sample
   
   #read in allele frequencies ...
   af = read.delim("data/23CBH.frq", header = F) 
     colnames(af) = c("chr", "pos", "f")
-    #af = af %>% filter(chr == 11)
+    af$maf = af$f
+    af$maf[af$f > 0.5] = 1 - af$maf[af$f > 0.5]
+    
+    # 
+    # hist(af$f)
+    # hist(af$maf)
+    # 
+    # hist(af$maf[af$maf < 0.01])
+    # 
+    # sum(af$maf > 0.001) / nrow(af)
+    # 
+    # 2 / (1928 * 2)
+    # 
+    
+    
+    
+    #remove mito
+    af = af %>% filter(!grepl("NW", chr))
+    gt2 = gt2[1:nrow(af),]
+    
   
     
 #TODO: fix missing breeders and 16workers from some colonies
@@ -223,18 +246,60 @@ for (i in (1:nrow(qgt))){
     write.table(qgt.out, "data/qgt.ped", 
                 row.names = F, col.names = F, quote = F, sep = " ")
     #TODO: write .map file
+    map = af %>% 
+      mutate(variant = paste0(chr, ":", pos),
+             cm = 0) %>% 
+      select(chr, variant, cm, pos)
+    
+    write.table(map, "data/qgt.map", 
+                row.names = F, col.names = F, quote = F, sep = " ")
     
   #TODO: write worker
     #??? maybe beagle format?
 
 #calculate the A matrix
   #this should be checked against the pedigree!
-  # 
+  rel = read.delim("data/qfilter.rel", header = F, sep = "")
+  relid = read.delim("data/qfilter.rel.id", header = F, sep = "")
+  
+  colnames(rel) = rownames(rel) = relid$V2
+  relmat = as.matrix(rel)
+  
+  relkeep = !is.nan(relmat[1,])
+  relmat = relmat[relkeep, relkeep]
+  
+  #remoake filtered list
+  relid.f = data.frame(queen_id = rownames(relmat)) %>% 
+    left_join(relid %>% select(queen_id = V2, breeder = V1))
+  
+  hist(relmat[lower.tri(relmat, diag = T)])
+  hist(relmat[lower.tri(relmat, diag = T)])
+  
+  table(relid.f$breeder)
+  
+  relid.f$color = 'gray'
+    relid.f$color[relid.f$breeder == "II87"] = 'red'
+    relid.f$color[relid.f$breeder == "BQ02"] = 'orange'
+    relid.f$color[relid.f$breeder == "I69"] = 'blue'
+    relid.f$color[relid.f$breeder == "BQ04"] = 'green'
+    relid.f$color[relid.f$breeder == "BQ03"] = 'yellow'
+  
+  
+  heatmap(relmat, ColSideColors = relid.f$color)
+  
+  
+  
+  #library(qgraph)
+  
+  qgraph(relmat, layout='spring', vsize=1,
+          cut = 0, repulsion = 1, diag = F
+        )
 
 
 
 
-#Theoretical Sim
+
+  #Theoretical Sim
 #####
 
 

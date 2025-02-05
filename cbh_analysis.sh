@@ -38,25 +38,27 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #sort and filter vcf
     #this is probably too many steps :/
     cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
-    echo "sorting input..."
-    #sort the input
-        cat 23CBH.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > 23CBH-sorted.vcf
-        conda activate ipyrad 
-        bgzip 23CBH-sorted.vcf
-        conda deactivate
-        
-        bcftools index -c 23CBH-sorted.vcf.gz 
-        bcftools annotate 23CBH-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force \
-            -Ob -o 23CBH.bcf.gz
-        bcftools index -c 23CBH.bcf.gz
-        
-        
+#     echo "sorting input..."
+#     #sort the input
+#         cat 23CBH.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > 23CBH-sorted.vcf
+#         conda activate ipyrad 
+#         bgzip 23CBH-sorted.vcf
+#         conda deactivate
+#         
+#         bcftools index -c 23CBH-sorted.vcf.gz 
+#         bcftools annotate 23CBH-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force \
+#             -Ob -o 23CBH.bcf.gz
+#         bcftools index -c 23CBH.bcf.gz
+#         
+#         
     echo "filtering input..."
     #filter the input
         #remove missing, keep all alleles (no MAF filter)
-        bcftools view 23CBH.bcf.gz -M2 -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
+        bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' --threads $SLURM_NTASKS \
             -Ob -o 23CBH-filter.bcf.gz
         bcftools index -c 23CBH-filter.bcf.gz
+        
+        #TODO: remove mito
         
         #pull vcf
         bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
@@ -69,7 +71,15 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
         bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
             bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
     
-    
+#predict queen and average worker genotypes
+    #see R script...
+
+#load into plink
+#     plink --file qgt --make-bed --out plink/qraw
+#     cd plink
+#     plink --bfile qraw --make-bed --geno 0.1 --distance square ibs --out qfilter
+# 
+#     
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
 #         bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
