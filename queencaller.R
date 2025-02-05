@@ -4,8 +4,8 @@
 
 suppressMessages(library(tidyverse))
 suppressMessages(library(vcfR))
-suppressMessages(library(foreach))
 suppressMessages(library(doParallel))
+suppressMessages(library(foreach))
 
 select = dplyr::select
 

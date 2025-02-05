@@ -5,6 +5,8 @@ library(purrr)
 
 select = dplyr::select
 
+install.packages("foreach")
+
 #read files
   #read in sample names
   samples = read.delim("data/header.txt", header = F) %>% t() %>% 
