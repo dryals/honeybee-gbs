@@ -65,11 +65,11 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
         grep "#CHROM" -m 1 23CBH.vcf > header.txt
         
         
-#     echo "calculataing allele freqs..."
-#         bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
-#             bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
-#     
-#     
+    echo "calculataing allele freqs..."
+        bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+            bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
+    
+    
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
 #         bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
