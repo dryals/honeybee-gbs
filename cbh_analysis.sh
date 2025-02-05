@@ -3,7 +3,7 @@
 # FILENAME: cbh_analysis.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --time=05:00:00
 #SBATCH --job-name gbs_analysis
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/analysis_cbh.out
@@ -51,30 +51,44 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         bcftools index -c 23CBH.bcf.gz
 #         
 #         
-    echo "filtering input..."
-    #filter the input
-        #remove missing, keep all alleles (no MAF filter)
-        bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
-            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
-            --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
-            
-        bcftools index -c 23CBH-filter.bcf.gz
-        
-        #TODO: remove mito
-        
-        #pull vcf
-        bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
-        
-        #pull sample names
-        grep "#CHROM" -m 1 23CBH.vcf > header.txt
-        
-        
-    echo "calculataing allele freqs..."
-        bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
-            bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
-    
-#predict queen and average worker genotypes
+#     echo "filtering input..."
+#     #filter the input
+#         #remove missing, keep all alleles (no MAF filter)
+#         bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
+#             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+#             --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
+#             
+#         bcftools index -c 23CBH-filter.bcf.gz
+#         
+#         #TODO: remove mito
+#         
+#         #pull vcf
+#         bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
+#         
+#         #pull sample names
+#         grep "#CHROM" -m 1 23CBH.vcf > header.txt
+#         
+#         
+#     echo "calculataing allele freqs..."
+#         bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+#             bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
+#     
+# #predict queen and average worker genotypes
     #see R script...
+    Rscript --vanilla --silent /home/dryals/ryals/honeybee-gbs/queencaller.R
+    
+    
+    
+#     #split chrs
+#     mkdir -p chrs
+#     cd chrs
+#     for i in {1..16}
+#     do
+#         mkdir -p chr${i}
+#         bcftools view ../23CBH-filter.bcf.gz -r $i -Ov -o chr${i}/23CBH-filter-${i}.vcf
+#     
+#     done
+    
 
 #load into plink
 #     plink --file qgt --make-bed --out plink/qraw
