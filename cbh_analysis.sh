@@ -93,9 +93,9 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
 
 #load into plink
-    plink --file qgttest --make-bed --out plink/qraw
-    cd plink
-    plink --bfile qraw --make-bed --geno 0.1 --maf 0.01 --mind 0.1 --make-rel square --out qfilter
+#     plink --file qgttest --make-bed --out plink/qraw
+#     cd plink
+#     plink --bfile qraw --make-bed --geno 0.1 --maf 0.01 --mind 0.1 --make-rel square --out qfilter
 
 #     
 #         #depth and coverage stats
