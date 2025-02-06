@@ -75,6 +75,8 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #     
 # #predict queen and average worker genotypes
     #see R script...
+    
+    #TODO: this isn't getting great results, double-check and debug script. 
     Rscript --vanilla --silent /home/dryals/ryals/honeybee-gbs/queencaller.R
     
     
@@ -91,10 +93,10 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
 
 #load into plink
-#     plink --file qgt --make-bed --out plink/qraw
-#     cd plink
-#     plink --bfile qraw --make-bed --geno 0.1 --distance square ibs --out qfilter
-# 
+    plink --file qgttest --make-bed --out plink/qraw
+    cd plink
+    plink --bfile qraw --make-bed --geno 0.1 --maf 0.01 --mind 0.1 --make-rel square --out qfilter
+
 #     
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names

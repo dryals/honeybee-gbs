@@ -44,27 +44,27 @@ af = read.delim("23CBH.frq", header = F)
   
 #randomly sample for testing
   # set.seed(123)
-  # fewsites = sample(1:nrow(gt2), 4000) %>% sort()
+  # fewsites = sample(1:nrow(gt2), 1000) %>% sort()
+  # 
+  # oldaf = af
+  # oldgt = gt2
   # 
   # gt2 = gt2[fewsites, ]
   # af = af[fewsites, ]
 
   
 callqueen = function(CHR){
-  #filter 
+  #filter to selected chr
   chrrows = af$chr == CHR
   af.chr = af[chrrows,]
   gt2.chr = gt2[chrrows,]
   
-  #create object for queen and worker group gt
-  
+  #create object for queen gt
   qgt = matrix(nrow = nrow(af.chr), 
                ncol = length(unique(samples$queen_id))) %>% 
     as.data.frame
   colnames(qgt) = unique(samples$queen_id)
-  
-  
-  
+
   #loop through sites
   for (i in (1:nrow(qgt))){
     p = af.chr$f[i]
@@ -78,7 +78,7 @@ callqueen = function(CHR){
     for (col in colnames(qgt)){
       #pull workers
       cworkers.cols = grepl(col, colnames(gt2.chr))
-      #estimate queen gt and error accounting for missing genotypes
+      #pull genotypes
       cworkers.gt = as.numeric(gt2.chr[i, cworkers.cols])
       cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
       nworker = length(cworkers.gt)
@@ -87,19 +87,19 @@ callqueen = function(CHR){
         qgt[i, col] = NA
         next
       }
+      #sum genotypes
       cworkers.counts = c(sum(cworkers.gt == 2), 
                           sum(cworkers.gt == 1), 
                           sum(cworkers.gt == 0))
-      #multinomial
-      #lik of q2
-      lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
-      #likelihood of q1
-      lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
-      #lik of q0
-      lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
-      
+      #multinomial likelihood
+        #lik of q2
+        lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
+        #likelihood of q1
+        lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
+        #lik of q0
+        lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
+      #write max likelihood
       qgt[i, col] = c(2, 1, 0)[which.max(c(lq2, lq1, lq0))]
-      
     }
   }
   return(qgt)
@@ -110,18 +110,21 @@ callqueen = function(CHR){
   
   #starttime = Sys.time()
   
-    finalqgt = foreach(i=1:16, .combine=rbind) %dopar%
-      callqueen(i)
+    finalqgt = foreach(chr=1:16, .combine=rbind) %dopar%
+      callqueen(chr)
   
+    
+    # sum(finalqgt1 == finalqgt2 |
+    #       is.na(finalqgt1 & is.na(finalqgt2)))
+    # 
+    # prod(dim(finalqgt1))
+    
   #Sys.time() - starttime
 
 
 #write object 
   #write queen for plink .ped
-  pt1 = data.frame(IID = names(finalqgt)) %>% 
-    left_join(samples %>% select(IID = queen_id, FID = queen_id), multiple = 'first') %>% 
-    mutate(FID = gsub("-", "", FID)) %>% 
-    select(FID, IID) %>% 
+  pt1 = data.frame(FID = names(finalqgt), IID = names(finalqgt)) %>% 
     mutate(father = 0, mother = 0, sex = 2, pheno = 0)
   
   pt2 = t(finalqgt)
@@ -143,25 +146,3 @@ callqueen = function(CHR){
   write.table(map, "qgt.map", 
               row.names = F, col.names = F, quote = F, sep = " ")
 
-
-
-#mean(af$f[af$chr == i])
-
-
-  
-  
-# #write out in brief form
-# write.table(af %>% select(chr, pos), 
-#             file = paste0("chrs/chr",chrno,"/", chrno, ".sites"),
-#             col.names = F, quote = F, row.names = F)
-# 
-# write.table(qgt, 
-#             file = paste0("chrs/chr",chrno,"/", chrno, ".geno"),
-#             col.names = F, quote = F, row.names = F, sep = " ")
-# 
-# write.table(colnames(qgt), 
-#             file = paste0("chrs/chr",chrno,"/", chrno, ".names"),
-#             col.names = F, quote = F, row.names = F, sep = " ")
-# 
-# 
-#   

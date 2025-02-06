@@ -5,7 +5,7 @@ library(purrr)
 
 select = dplyr::select
 
-install.packages("foreach")
+#install.packages("foreach")
 
 #read files
   #read in sample names
@@ -180,84 +180,84 @@ install.packages("foreach")
 
 #queen and average worker gt
 #####
-#create object for queen and worker group gt
-      qgt = matrix(nrow = nrow(af), ncol = length(unique(samples$queen_id))) %>% 
-        as.data.frame
-        colnames(qgt) = unique(samples$queen_id)
-      wgt = qgt
-
-#loop through sites
-      #could also be coded by creating one new obj for each step...
-        #takes like 20min with 7k sites
-      #TODO: possible to call one queen allele if not both???
-for (i in (1:nrow(qgt))){
-  
-  p = af$f[i]
-  #queen genotype likelihood
-  qgl = data.frame("w2" = c(p, p/2, 0), 
-                   "w1" = c(1-p, 1/2, p), 
-                   "w0" = c(0, (1-p)/2, 1-p))
-  rownames(qgl) = c("q2", "q1", "q0")
-  
-  #loop through colonies
-  for (c in colnames(qgt)){
-    #pull workers
-    cworkers.cols = grepl(c, colnames(gt2))
-    #estimate queen gt and error accounting for missing genotypes
-    cworkers.gt = as.numeric(gt2[i, cworkers.cols])
-      cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
-    nworker = length(cworkers.gt)
-    #require 5 non-missing
-    if(nworker < 6){
-      qgt[i, c] = NA
-      next
-    }
-    cworkers.counts = c(sum(cworkers.gt == 2), 
-                        sum(cworkers.gt == 1), 
-                        sum(cworkers.gt == 0))
-    #multinomial
-      #lik of q2
-      lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
-      #likelihood of q1
-      lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
-      #lik of q0
-      lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
-      
-      qgt[i, c] = c(2, 1, 0)[which.max(c(lq2, lq1, lq0))]
-    
-    #TODO: calculate average worker gt
-  }
-}
-#write object 
-  #write queen for plink .ped
-    pt1 = data.frame(IID = names(qgt)) %>% 
-      left_join(samples %>% select(IID = queen_id, FID = breeder), multiple = 'first') %>% 
-      mutate(FID = gsub("-", "", FID)) %>% 
-      select(FID, IID) %>% 
-      mutate(father = 0, mother = 0, sex = 2, pheno = 0)
-    
-    pt2 = t(qgt)
-      pt2[pt2 == 0] = "TT"
-      pt2[pt2 == 1] = "AT"
-      pt2[pt2 == 2] = "AA"
-      pt2[is.na(pt2)] = "00"
-      
-    
-    qgt.out = cbind(pt1, pt2)
-    
-    write.table(qgt.out, "data/qgt.ped", 
-                row.names = F, col.names = F, quote = F, sep = " ")
-    #TODO: write .map file
-    map = af %>% 
-      mutate(variant = paste0(chr, ":", pos),
-             cm = 0) %>% 
-      select(chr, variant, cm, pos)
-    
-    write.table(map, "data/qgt.map", 
-                row.names = F, col.names = F, quote = F, sep = " ")
-    
-  #TODO: write worker
-    #??? maybe beagle format?
+# #create object for queen and worker group gt
+#       qgt = matrix(nrow = nrow(af), ncol = length(unique(samples$queen_id))) %>% 
+#         as.data.frame
+#         colnames(qgt) = unique(samples$queen_id)
+#       wgt = qgt
+# 
+# #loop through sites
+#       #could also be coded by creating one new obj for each step...
+#         #takes like 20min with 7k sites
+#       #TODO: possible to call one queen allele if not both???
+# for (i in (1:nrow(qgt))){
+#   
+#   p = af$f[i]
+#   #queen genotype likelihood
+#   qgl = data.frame("w2" = c(p, p/2, 0), 
+#                    "w1" = c(1-p, 1/2, p), 
+#                    "w0" = c(0, (1-p)/2, 1-p))
+#   rownames(qgl) = c("q2", "q1", "q0")
+#   
+#   #loop through colonies
+#   for (c in colnames(qgt)){
+#     #pull workers
+#     cworkers.cols = grepl(c, colnames(gt2))
+#     #estimate queen gt and error accounting for missing genotypes
+#     cworkers.gt = as.numeric(gt2[i, cworkers.cols])
+#       cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
+#     nworker = length(cworkers.gt)
+#     #require 5 non-missing
+#     if(nworker < 6){
+#       qgt[i, c] = NA
+#       next
+#     }
+#     cworkers.counts = c(sum(cworkers.gt == 2), 
+#                         sum(cworkers.gt == 1), 
+#                         sum(cworkers.gt == 0))
+#     #multinomial
+#       #lik of q2
+#       lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
+#       #likelihood of q1
+#       lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
+#       #lik of q0
+#       lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
+#       
+#       qgt[i, c] = c(2, 1, 0)[which.max(c(lq2, lq1, lq0))]
+#     
+#     #TODO: calculate average worker gt
+#   }
+# }
+# #write object 
+#   #write queen for plink .ped
+#     pt1 = data.frame(IID = names(qgt)) %>% 
+#       left_join(samples %>% select(IID = queen_id, FID = breeder), multiple = 'first') %>% 
+#       mutate(FID = gsub("-", "", FID)) %>% 
+#       select(FID, IID) %>% 
+#       mutate(father = 0, mother = 0, sex = 2, pheno = 0)
+#     
+#     pt2 = t(qgt)
+#       pt2[pt2 == 0] = "TT"
+#       pt2[pt2 == 1] = "AT"
+#       pt2[pt2 == 2] = "AA"
+#       pt2[is.na(pt2)] = "00"
+#       
+#     
+#     qgt.out = cbind(pt1, pt2)
+#     
+#     write.table(qgt.out, "data/qgt.ped", 
+#                 row.names = F, col.names = F, quote = F, sep = " ")
+#     #TODO: write .map file
+#     map = af %>% 
+#       mutate(variant = paste0(chr, ":", pos),
+#              cm = 0) %>% 
+#       select(chr, variant, cm, pos)
+#     
+#     write.table(map, "data/qgt.map", 
+#                 row.names = F, col.names = F, quote = F, sep = " ")
+#     
+#   #TODO: write worker
+#     #??? maybe beagle format?
 
 #calculate the A matrix
   #this should be checked against the pedigree!
@@ -272,8 +272,8 @@ for (i in (1:nrow(qgt))){
   
   #remoake filtered list
   relid.f = data.frame(queen_id = rownames(relmat)) %>% 
-    left_join(relid %>% select(queen_id = V2, breeder = V1)) %>% 
-    left_join(samples %>% select(queen_id, apiary_id), multiple = 'first')
+    left_join(relid %>% select(queen_id = V2)) %>% 
+    left_join(samples %>% select(queen_id, apiary_id, breeder), multiple = 'first')
   
   hist(relmat[lower.tri(relmat, diag = T)])
   hist(relmat[lower.tri(relmat, diag = T)])
@@ -287,7 +287,7 @@ for (i in (1:nrow(qgt))){
   
     relid.f$color[relid.f$breeder == "II87"] = 'red'
     relid.f$color[relid.f$breeder == "BQ02"] = 'orange'
-    relid.f$color[relid.f$breeder == "I69"] = 'blue'
+    relid.f$color[relid.f$breeder == "I-69"] = 'blue'
     relid.f$color[relid.f$breeder == "BQ04"] = 'green'
     relid.f$color[relid.f$breeder == "BQ03"] = 'yellow'
     
