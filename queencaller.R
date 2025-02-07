@@ -19,6 +19,9 @@ samples = read.delim("header.txt", header = F) %>% t() %>%
   mutate(queen_id = gsub("_[0-9]*", "", sample_id),
          colony_id = gsub("23CBH", "", queen_id)) 
 
+  # samples %>% group_by(colony_id) %>% summarise(n = n()) %>% 
+  # filter(n < 7) %>%  ungroup %>% arrange(n) 
+
 #read in allele frequencies ...
 af = read.delim("23CBH.frq", header = F) 
   colnames(af) = c("chr", "pos", "f")
@@ -26,7 +29,7 @@ af = read.delim("23CBH.frq", header = F)
 
 #read in genotypes
   #vcf.raw = read.vcfR(paste0("chrs/chr",chrno,"/23CBH-filter-", chrno, ".vcf"))
-  vcf.raw = read.vcfR("23CBH-filter.vcf")
+  vcf.raw = read.vcfR("23CBH-maf.vcf")
   
   
   #convert to dosage
@@ -44,7 +47,7 @@ af = read.delim("23CBH.frq", header = F)
   
 #randomly sample for testing
   # set.seed(123)
-  # fewsites = sample(1:nrow(gt2), 1000) %>% sort()
+  # fewsites = sample(1:nrow(gt2), 5000) %>% sort()
   # 
   # oldaf = af
   # oldgt = gt2
@@ -68,18 +71,21 @@ callqueen = function(CHR){
   #loop through sites
   for (i in (1:nrow(qgt))){
     p = af.chr$f[i]
-    #queen genotype likelihood
-    qgl = data.frame("w2" = c(p, p/2, 0), 
-                     "w1" = c(1-p, 1/2, p), 
-                     "w0" = c(0, (1-p)/2, 1-p))
-    rownames(qgl) = c("q2", "q1", "q0")
     
+    #contingent worker genotypes probability for each queen genotype
+      #worker probabilities in order: 2,1,0
+    cwgp = rbind(c(p, 1-p, 0),
+                c(p/2, 1/2, (1-p)/2),
+                c(0, p, 1-p))
+    #independent queen genotype probabilities (HW)
+      #2,1,0
+    iqgp = c(p**2, 2*p*(1-p), (1-p)**2)
+
     #loop through colonies
     for (col in colnames(qgt)){
-      #pull workers
-      cworkers.cols = grepl(col, colnames(gt2.chr))
       #pull genotypes
-      cworkers.gt = as.numeric(gt2.chr[i, cworkers.cols])
+      cworkers.gt = as.numeric(gt2.chr[i, grepl(col, colnames(gt2.chr))])
+      #remove NAs and count
       cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
       nworker = length(cworkers.gt)
       #require 5 non-missing
@@ -87,24 +93,45 @@ callqueen = function(CHR){
         qgt[i, col] = NA
         next
       }
+      
+      #simulation for testing
+      # rqg = c(0,1) #'real' queen genotype
+      # cworkers.gt = sample(rqg, nworker, replace = T) + 
+      #   sample(c(1,0), nworker, prob = c(p, 1-p), replace = T)
+      # 
+      # 
       #sum genotypes
       cworkers.counts = c(sum(cworkers.gt == 2), 
                           sum(cworkers.gt == 1), 
                           sum(cworkers.gt == 0))
-      #multinomial likelihood
-        #lik of q2
-        lq2 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[1,]))
-        #likelihood of q1
-        lq1 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[2,]))
-        #lik of q0
-        lq0 = dmultinom(cworkers.counts, nworker, as.numeric(qgl[3,]))
-      #write max likelihood
-      qgt[i, col] = c(2, 1, 0)[which.max(c(lq2, lq1, lq0))]
+      #cworkers.counts
+      
+      #bayes for each queen genotype
+        #independent probability of observing worker count
+          iwgp = dmultinom(cworkers.counts, nworker, iqgp)
+      
+        #probability of q2
+        pq2 = (dmultinom(cworkers.counts, nworker, cwgp[1,]) * iqgp[1]) / 
+                iwgp
+        #prob of q1
+        pq1 = (dmultinom(cworkers.counts, nworker, cwgp[2,]) * iqgp[2]) /
+                iwgp
+        #prob of q0
+        pq0 = (dmultinom(cworkers.counts, nworker, cwgp[3,]) * iqgp[3]) / 
+                iwgp
+        
+        #TODO: probs do not add to 1 ... this is bad ... 
+        #sum(pq2, pq0, pq1)
+        
+      #write max prob
+      qgt[i, col] = c(2, 1, 0)[which.max(c(pq2, pq1, pq0))]
     }
   }
   return(qgt)
 }  
 
+
+#callqueen(16)
 #run in parallel
   registerDoParallel(cores = 16)
   

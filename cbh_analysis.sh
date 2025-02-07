@@ -51,28 +51,37 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         bcftools index -c 23CBH.bcf.gz
 #         
 #         
-#     echo "filtering input..."
-#     #filter the input
-#         #remove missing, keep all alleles (no MAF filter)
-#         bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
-#             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
-#             --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
-#             
-#         bcftools index -c 23CBH-filter.bcf.gz
-#         
-#         #TODO: remove mito
-#         
-#         #pull vcf
-#         bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
-#         
-#         #pull sample names
-#         grep "#CHROM" -m 1 23CBH.vcf > header.txt
-#         
-#         
-#     echo "calculataing allele freqs..."
-#         bcftools view 23CBH-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
-#             bcftools +fill-tags | bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
-#     
+    echo "filtering input..."
+    #filter the input
+        #remove missing, keep all alleles (no MAF filter)
+        bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
+            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+            --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
+            
+        bcftools index -c 23CBH-filter.bcf.gz
+        
+        #maf filter
+        bcftools view 23CBH-filter.bcf.gz -q 0.01:minor --threads $SLURM_NTASKS -Ob -o 23CBH-maf.bcf.gz
+        bcftools index -c 23CBH-maf.bcf.gz
+        
+        
+        #pull vcf
+        #bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
+        bcftools view 23CBH-maf.bcf.gz -Ov -o 23CBH-maf.vcf
+        
+        #pull sample names
+        #grep "#CHROM" -m 1 23CBH.vcf > header.txt
+        
+        
+    echo "calculataing allele freqs..."
+    bcftools view 23CBH-maf.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+            bcftools +fill-tags -Ob -o 23CBH-balanced.bcf.gz
+            
+    bcftools index -c 23CBH-balanced.bcf.gz
+            
+    bcftools view 23CBH-balanced.bcf.gz -Ou | bcftools +fill-tags -Ou | \
+        bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
+   
 # #predict queen and average worker genotypes
     #see R script...
     
@@ -93,11 +102,42 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
 
 #load into plink
-#     plink --file qgttest --make-bed --out plink/qraw
-#     cd plink
-#     plink --bfile qraw --make-bed --geno 0.1 --maf 0.01 --mind 0.1 --make-rel square --out qfilter
+    #create worker
+    plink --vcf 23CBH-filter.vcf --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort \
+            --set-missing-var-ids @:# --maf 0.01 --mind 0.5 --geno 0.2 \
+            --threads $SLURM_NTASKS --out plink/workers
+            
+    cd plink
+    plink --bfile workers --read-freq balworkers.frq --make-rel square --out workers
+    
+    #queens
+    plink --file qgt --make-bed --out plink/qraw
+    cd plink
+    plink --bfile qraw --make-bed --geno 0.2 --mind 0.5 --maf 0.05  \
+        --make-rel square --out qfilter
+    
+        #optional: read balanced worker set to calc af
+    plink --bcf 23CBH-balanced.bcf.gz --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort \
+            --set-missing-var-ids @:# \
+            --threads $SLURM_NTASKS --out plink/balworkers
+    cd plink
+    plink --bfile balworkers --freq --out balworkers
+    plink --bfile qraw --make-bed --read-freq balworkers.frq --geno 0.2 --mind 0.5 --maf 0.05 \
+        --make-rel square --out qfilter
+    
+    
+    
+    plink --bfile qfilter --threads $SLURM_NTASKS --maf 0.05 --pca 100 --out pca
+    
+    #output for blup
+        #there has GOT to be a better way ...
+    plink --bfile qfilter --recode A --out test
+        awk '{$1=$3=$4=$5=$6=""; print $0}' test.raw | tail -n +2 |\
+            sed -r 's/[NA]+/5/g' | sed 's/ \{2,\}/!/g' | tr -d ' ' | tr '!' ' ' > blup.raw
+            
+    
 
-#     
+#     q
 #         #depth and coverage stats
 #         bcftools query -l bag13-filter.bcf.gz > bag13-filter.names
 #         bcftools query -f'%CHROM\t%POS\t%DP\n' bag13-filter.bcf.gz > bag13-filter.depth
