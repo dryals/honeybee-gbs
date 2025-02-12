@@ -129,6 +129,12 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
     plink --bfile qfilter --threads $SLURM_NTASKS --maf 0.05 --pca 100 --out pca
     
+    #queens and workers together
+#     cat qraw.fam workers.fam > testqw.fam
+#     cp workers.fam > 
+#     plink testqw
+    
+    
     #output for blup
         #there has GOT to be a better way ...
     plink --bfile qfilter --recode A --out test
