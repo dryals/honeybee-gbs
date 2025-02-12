@@ -130,9 +130,16 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     plink --bfile qfilter --threads $SLURM_NTASKS --maf 0.05 --pca 100 --out pca
     
     #queens and workers together
-#     cat qraw.fam workers.fam > testqw.fam
-#     cp workers.fam > 
-#     plink testqw
+    cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
+    cat qgt.ped wgt.ped > qw.ped
+    cp qgt.map qw.map
+    
+     plink --file qw --make-bed --out plink/qwraw
+     
+     cd plink
+     plink --bfile qwraw --make-bed --read-freq balworkers.frq --geno 0.2 --mind 0.5 --maf 0.05 \
+        --make-rel square --out qwfilter
+    
     
     
     #output for blup
