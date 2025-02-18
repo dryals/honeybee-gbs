@@ -149,7 +149,7 @@ callqueen = function(CHR){
   #Sys.time() - starttime
 
 
-#write object 
+#write queen object 
   #write queen for plink .ped
   pt1 = data.frame(FID = names(finalqgt), IID = names(finalqgt)) %>% 
     mutate(father = 0, mother = 0, sex = 2, pheno = 0)
@@ -172,4 +172,29 @@ callqueen = function(CHR){
   
   write.table(map, "qgt.map", 
               row.names = F, col.names = F, quote = F, sep = " ")
+  
+#write raw worker object
+  #write worker for plink .ped
+  pt1 = data.frame(FID = colnames(gt2), IID = colnames(gt2)) %>% 
+    mutate(father = 0, mother = 0, sex = 2, pheno = 0)
+  
+  pt2 = t(gt2)
+  pt2[pt2 == 0] = "TT"
+  pt2[pt2 == 1] = "AT"
+  pt2[pt2 == 2] = "AA"
+  pt2[is.na(pt2)] = "00"
+  
+  wgt.out = cbind(pt1, pt2)
+  
+  write.table(wgt.out, "wgt.ped", 
+              row.names = F, col.names = F, quote = F, sep = " ")
+  #write .map file
+  map = af %>% 
+    mutate(variant = paste0(chr, ":", pos),
+           cm = 0) %>% 
+    select(chr, variant, cm, pos)
+  
+  write.table(map, "wgt.map", 
+              row.names = F, col.names = F, quote = F, sep = " ")
+  
 
