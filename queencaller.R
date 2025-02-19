@@ -6,6 +6,7 @@ suppressMessages(library(tidyverse))
 suppressMessages(library(vcfR))
 suppressMessages(library(doParallel))
 suppressMessages(library(foreach))
+suppressMessages(library(matrixcalc))
 
 select = dplyr::select
 
@@ -198,3 +199,57 @@ callqueen = function(CHR){
               row.names = F, col.names = F, quote = F, sep = " ")
   
 
+  
+#workers
+  #create data matrix
+  wgt = matrix(nrow = nrow(af), 
+               ncol = length(unique(samples$queen_id))) %>% 
+    as.data.frame
+  colnames(wgt) = paste0(unique(samples$queen_id), "_w")
+  
+  #as numeric
+  gt3 = apply(gt2, 2, as.numeric)
+  
+  #loop through colonies
+  ucols = unique(samples$queen_id)
+  for(i in 1:length(ucols)){
+    #TODO: ensure not too many NAs
+    wgt[,i] = rowMeans(gt3[,grepl(ucols[i], colnames(gt3))], na.rm = T)
+    
+  }  
+  
+  #center by subtracting 2*f
+  wgt.c = apply(wgt, 2, function(x){
+    x - (2*af$f)
+  })
+  
+  sum(is.na(wgt.c))
+  
+  #assume 0 where NA???
+    #try imputation??
+  wgt.c[is.na(wgt.c)] = 0
+  
+  #vanraiden scaling parameter
+  k = 2 * sum(af$f * (1-af$f))
+  
+  #G matrix
+  G.w = (t(wgt.c) %*% wgt.c) / k
+  
+  #heatmap(G.w)
+  
+  #fix symmetry
+  for(i in 1:dim(G.w)[1]){
+    for(j in 1:i){
+      G.w[j,i] = G.w[i,j]
+    }
+  }
+  is.positive.definite(G.w)
+
+  #TODO:
+    #address diagonal (not inbreeding?)
+    #compare new to old w matrix
+    #combine with queens
+    #GWAS ... ??? 
+  
+  
+  
