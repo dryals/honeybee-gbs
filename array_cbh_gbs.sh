@@ -85,8 +85,17 @@ do
     #rename dirs and fastqs
         #_R1_ and _R2_ required in filename!!!
         cd data/CBH2023
+        #rename files without underscore
+        if [ -d "23CBH${P}" ]; then
+            echo "renaming dir"
+            mv 23CBH${P} 23CBH_${P}
+            cd 23CBH_${P}
+            mv 23CBH${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
+            mv 23CBH${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
+            cd ..
+        fi
         #exit if file not found
-        ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
+        #ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
         #rename dirs without year code
         if [ -d "CBH_${P}" ]; then
             echo "renaming dir"
