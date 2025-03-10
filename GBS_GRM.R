@@ -39,6 +39,7 @@ theme_set(theme_bw())
   hist(s5$reads_consens)
   hist(s5.sum$nbad)
   
+  unique(s5$queen_id[!grepl("23CBH[0-9]", s5$queen_id)])
 
   sum(s5$reads_consens[!s5$bad], na.rm = T)
 
