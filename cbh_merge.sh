@@ -23,12 +23,12 @@ conda activate ipyrad
 
 echo "-------------"
 
-echo "merging plates..."
-    #gather completed files
-    cd $CLUSTER_SCRATCH/gbs/23CBH
-        mkdir -p varcall-update
-        cd varcall-update
-        
+# echo "merging plates..."
+#     #gather completed files
+#     cd $CLUSTER_SCRATCH/gbs/23CBH
+#         mkdir -p varcall-update
+#         cd varcall-update
+#         
 #         #create var with all plate names
 #         ls ../*/*.json
 #         #...
@@ -52,7 +52,7 @@ echo "launching ipyrad..."
 
     #WARNING: ensure the correct param file is used! edit if needed after merging...
 
-    cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
+    cd $CLUSTER_SCRATCH/gbs/23CBH/varcall-update
     ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
 #    
 #     #branch, remove samples, and output vcf
