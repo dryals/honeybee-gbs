@@ -3,8 +3,8 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=4
-#SBATCH --mem-per-cpu=8G
+#SBATCH --ntasks=20
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -39,20 +39,21 @@ echo "merging plates..."
 #         done 
 #             echo "" >> mergep.txt
 #             
-            
-        mp=$( cat mergep.txt )
-        
-    #create merged param file
-    ipyrad -m varcall-update $mp
-    
-    #edit if needed...
-       
-# echo "launching ipyrad..."
-# 
-#     #WARNING: ensure the correct param file is used! edit if needed after merging...
-# 
-#     cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
-#     ipyrad -p params-varcalltest.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
+#             
+#         mp=$( cat mergep.txt )
+#         
+#     #create merged param file
+#     ipyrad -m varcall-update $mp
+#     
+#     #edit if needed...
+#      
+     
+echo "launching ipyrad..."
+
+    #WARNING: ensure the correct param file is used! edit if needed after merging...
+
+    cd $CLUSTER_SCRATCH/gbs/23CBH/varcalltest
+    ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
 #    
 #     #branch, remove samples, and output vcf
 #     ipyrad -p params-varcalltest.txt -b varcallfinal - 23CBH193_4 23CBH149_2 23CBH323_4 23CBH224_1 \
