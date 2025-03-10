@@ -25,12 +25,12 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
 
 
-# #select samples to remove
-# cd $CLUSTER_SCRATCH/gbs/23CBH
-# 
-# 
-# head -n 1 23CBH_1/*consens/s5* > s5summary.txt
-# sed -s 1d  */*consens/s5* >> s5summary.txt
+#select samples to remove
+cd $CLUSTER_SCRATCH/gbs/23CBH
+
+
+head -n 1 23CBH_1/*consens/s5* > s5summary.txt
+sed -s 1d  */*consens/s5* >> s5summary.txt
 
 #move results into working directory
     #...

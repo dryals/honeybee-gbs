@@ -3,9 +3,9 @@
 # FILENAME: cbh_merge.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=20
+#SBATCH --ntasks=30
 #SBATCH --mem-per-cpu=6G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/merge.out
@@ -51,21 +51,21 @@ echo "-------------"
 echo "launching ipyrad..."
 
     #WARNING: ensure the correct param file is used! edit if needed after merging...
+    
 
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcall-update
     ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
-#    
-#     #branch, remove samples, and output vcf
-#     ipyrad -p params-varcalltest.txt -b varcallfinal - 23CBH193_4 23CBH149_2 23CBH323_4 23CBH224_1 \
-#         23CBH183_5 23CBH347_2 23CBH121_1 23CBH196_6 23CBH335_6 23CBH344_8
-#    
+    
+#     #manual analysis with cbh_analysis...
+#     toremove=$( cat toremove.txt )
 #     
-#     #remove '23CBH193_4', '23CBH149_2', '23CBH323_4', '23CBH224_1', '23CBH183_5', '23CBH347_2', '23CBH121_1', '23CBH196_6', '23CBH335_6', '23CBH344_8'
-#    
-#    
-#    #remove samples with too few clusters before s6 ...
-#    
-#     ipyrad -p params-varcallfinal.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+#     #adjust line 21 in param file to refelct new 90% locus threshold
+#     
+#     
+#     #branch, remove samples, and output vcf
+#     ipyrad -p params-varcall-update.txt -b varcall-update-final - $toremove
+#  
+#     ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 #     
 #     
     
@@ -84,9 +84,6 @@ echo "launching ipyrad..."
         #try adjusting params 11 and 12 to increase usable data (but decrease quality?)
         #try adjusting params 14 for quicker s6
         
-       
-  
-  #old
 
 echo "-------------"
 echo "done"
