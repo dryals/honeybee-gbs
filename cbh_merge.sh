@@ -43,7 +43,7 @@ echo "merging plates..."
         mp=$( cat mergep.txt )
         
     #create merged param file
-    ipyrad -m varcalltest $mp
+    ipyrad -m varcall-update $mp
     
     #edit if needed...
        
