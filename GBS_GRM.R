@@ -25,7 +25,7 @@ theme_set(theme_bw())
   s5 = read.delim("data/s5summary.txt", sep = "")
 
   s5$bad = (is.nan(s5$nsites) | s5$nsites == 0 |
-              s5$reads_consens < 2.5e4)
+              s5$reads_consens < 2e4)
   s5$sample_id = rownames(s5)
   s5 = s5 %>% select(sample_id, reads_consens, nsites, bad)
   #add sample info

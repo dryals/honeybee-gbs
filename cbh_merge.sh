@@ -56,6 +56,9 @@ echo "launching ipyrad..."
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcall-update
     ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
     
+    #hanging on 'building database' with 6GB * 30 cores? Try highmem?
+    #
+    
 #     #manual analysis with cbh_analysis...
 #     toremove=$( cat toremove.txt )
 #     
