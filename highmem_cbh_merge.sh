@@ -3,8 +3,8 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=20
-#SBATCH --mem-per-cpu=12G
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=16G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
@@ -56,7 +56,7 @@ echo "launching ipyrad..."
     ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
     
     #hanging on 'building database' with 6GB * 30 cores? Try highmem?
-    #
+    #OOM with 12G, trying 16G
     
 #     #manual analysis with cbh_analysis...
 #     toremove=$( cat toremove.txt )
