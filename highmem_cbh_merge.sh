@@ -3,8 +3,8 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=16
-#SBATCH --mem-per-cpu=16G
+#SBATCH --ntasks=12
+#SBATCH --mem-per-cpu=20G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
