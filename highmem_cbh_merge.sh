@@ -3,8 +3,8 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=12
-#SBATCH --mem-per-cpu=20G
+#SBATCH --ntasks=8
+#SBATCH --mem-per-cpu=64G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
@@ -53,23 +53,26 @@ echo "launching ipyrad..."
     
 
     cd $CLUSTER_SCRATCH/gbs/23CBH/varcall-update
-    ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
     
-    #hanging on 'building database' with 6GB * 30 cores? Try highmem?
-    #OOM with 12G, trying 16G
+#     ipyrad -p params-varcall-update.txt -s 6 -c $SLURM_NTASKS -d -f --MPI
+#     
+#     #hanging on 'building database' with 6GB * 30 cores? Try highmem?
+#     #OOM with 12G, trying 16G
+#     #finally succedded with 20G * 14 tasks
+#     
+    #manual analysis with cbh_analysis...
+    toremove=$( cat toremove.txt )
     
-#     #manual analysis with cbh_analysis...
-#     toremove=$( cat toremove.txt )
-#     
-#     #adjust line 21 in param file to refelct new 90% locus threshold
-#     
-#     
-#     #branch, remove samples, and output vcf
-#     ipyrad -p params-varcall-update.txt -b varcall-update-final - $toremove
-#  
-#     ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
-#     
-#     
+    #adjust line 21 in param file to refelct new 90% locus threshold
+    
+    
+    #branch, remove samples, and output vcf
+    ipyrad -p params-varcall-update.txt -b varcall-update-final - $toremove
+ 
+    ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+    
+    
+    #trying s7 64G * 8 tasks on highmem
     
     #s7 froze at 33% completion, trying with 
     #s7 also errors at 8G * 24 cores: ipyparallel.error.EngineError: Engine b'98b61bdc-b5e555fd93b43e8c2ec98921' died while running task '03985a02-0d72077978c48d97fcac8e00_1845710_144'
