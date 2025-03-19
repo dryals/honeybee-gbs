@@ -75,6 +75,14 @@ echo "launching ipyrad..."
     #trying s7 64G * 8 tasks on highmem
         #may need to re-run everything with stricter filtering to run this in < 24hrs
         # ... or break in half and merge vcfs later???
+        #fail
+    #trying 80G * 6 tasks
+        #... definitely will need to break into separate tasks ...
+    
+    
+    
+    #old notes
+
     
     #s7 froze at 33% completion, trying with 
     #s7 also errors at 8G * 24 cores: ipyparallel.error.EngineError: Engine b'98b61bdc-b5e555fd93b43e8c2ec98921' died while running task '03985a02-0d72077978c48d97fcac8e00_1845710_144'
