@@ -3,8 +3,8 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=8
-#SBATCH --mem-per-cpu=64G
+#SBATCH --ntasks=6
+#SBATCH --mem-per-cpu=80G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
@@ -73,6 +73,8 @@ echo "launching ipyrad..."
     
     
     #trying s7 64G * 8 tasks on highmem
+        #may need to re-run everything with stricter filtering to run this in < 24hrs
+        # ... or break in half and merge vcfs later???
     
     #s7 froze at 33% completion, trying with 
     #s7 also errors at 8G * 24 cores: ipyparallel.error.EngineError: Engine b'98b61bdc-b5e555fd93b43e8c2ec98921' died while running task '03985a02-0d72077978c48d97fcac8e00_1845710_144'
