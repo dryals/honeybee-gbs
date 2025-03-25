@@ -10,11 +10,11 @@ theme_set(theme_bw())
 
 #read files
 
-  #read in sample names by vcf header
-  # samples = read.delim("data/header.txt", header = F) %>% t() %>% 
-  #   as.data.frame() %>% 
-  #   rename(sample_id = 1) %>% 
-  #   filter(grepl("23CBH", sample_id)) %>% 
+  # #read in sample names by vcf header
+  # samples = read.delim("data/header.txt", header = F) %>% t() %>%
+  #   as.data.frame() %>%
+  #   rename(sample_id = 1) %>%
+  #   filter(grepl("23CBH", sample_id)) %>%
   #   mutate(queen_id = gsub("_[0-9]*", "", sample_id),
   #          colony_id = gsub("23CBH", "", queen_id))
   
@@ -50,21 +50,21 @@ theme_set(theme_bw())
 
   #sample threshold for 90% complete data?
   sum(!s5$bad) * 0.90
-  # 
-  # #read in VCF
-  # vcf.raw = read.vcfR("data/23CBH-filter.vcf")
-  # 
-  # #convert to dosage
-  #   gt = extract.gt(vcf.raw)
-  #   
-  #   gt2 = gt
-  #     gt2[gt == "0/0"] = "0"
-  #     gt2[gt2 == "1/1"] = "2"
-  #     gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
-  #     gt2 = as.data.frame(gt2)
-  #     
-  #   rm(gt, vcf.raw)
-  #   
+
+  #read in VCF
+  vcf.raw = read.vcfR("data/23CBH-filter.vcf")
+
+  #convert to dosage
+    gt = extract.gt(vcf.raw)
+
+    gt2 = gt
+      gt2[gt == "0/0"] = "0"
+      gt2[gt2 == "1/1"] = "2"
+      gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
+      gt2 = as.data.frame(gt2)
+
+    rm(gt, vcf.raw)
+
   
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
