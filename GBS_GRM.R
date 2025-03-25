@@ -10,13 +10,14 @@ theme_set(theme_bw())
 
 #read files
 
-  # #read in sample names by vcf header
-  # samples = read.delim("data/header.txt", header = F) %>% t() %>%
-  #   as.data.frame() %>%
-  #   rename(sample_id = 1) %>%
-  #   filter(grepl("23CBH", sample_id)) %>%
-  #   mutate(queen_id = gsub("_[0-9]*", "", sample_id),
-  #          colony_id = gsub("23CBH", "", queen_id))
+  #read in sample names by vcf header
+  #samples = read.delim("data/header.txt", header = F) %>% t
+  samples = read.delim("/scratch/negishi/dryals/gbs/23CBH/analysis/header.txt", header = F) %>% t() %>%
+    as.data.frame() %>%
+    rename(sample_id = 1) %>%
+    filter(grepl("23CBH", sample_id)) %>%
+    mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+           colony_id = gsub("23CBH", "", queen_id))
   
   #or by barcodes
 
@@ -53,6 +54,7 @@ theme_set(theme_bw())
 
   #read in VCF
   vcf.raw = read.vcfR("data/23CBH-filter.vcf")
+  vcf.raw = read.vcfR("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-filter.vcf")
 
   #convert to dosage
     gt = extract.gt(vcf.raw)
@@ -69,6 +71,7 @@ theme_set(theme_bw())
   #read in pedigree
   pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
     mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
+  
   samples = samples %>% left_join(pheno %>% select(colony_id, breeder, apiary_id))
   
   # #create representative sample: 10 colonies from each breeder
@@ -132,33 +135,40 @@ theme_set(theme_bw())
                               apply(cgt, 1, function(x){sd(x, na.rm = T)}),
                               na.rm = T)
       #genoytpe distance
-      coldiv$dist.gt[i] = cd(cgt)
+      #coldiv$dist.gt[i] = cd(cgt)
     }    
     
     hist(coldiv$sd.gt)
     plot(coldiv$sd.gt, coldiv$dist.gt)
       
-    #write_csv(coldiv, file = "data/coldiv.csv")
+    write.csv(coldiv, file = "data/coldiv.csv",
+              quote = F)
     
     
     
   #quickly check against phenos ... 
     pheno$queen_id = paste0("23CBH", pheno$colony_id)
     pheno = pheno %>% left_join(coldiv)
-    sum(!is.na(pheno$dist.gt))
+    sum(!is.na(pheno$sd.gt))
     
     pheno.f = pheno %>% 
-      filter(!is.na(dist.gt), !is.na(pattern)) %>% 
-      mutate(apiary_id = as.character(apiary_id))
+      filter(!is.na(sd.gt), !is.na(pattern)) %>% 
+      mutate(apiary_id = as.character(apiary_id)) 
+      pheno.f$survival = ifelse(pheno.f$survival > 0, 1, 0)
     
-    mod = lm(honey ~ apiary_id + established + breeder,  data = pheno.f)
+    #mod = lm(pattern ~ apiary_id + established,  data = pheno.f)
+    mod = glm(survival ~ apiary_id + established, family = "binomial",  data = pheno.f)
     
-    test = data.frame(resid = mod$residuals, dist = pheno.f$dist.gt)
+    test = data.frame(resid = mod$residuals, dist = pheno.f$sd.gt)
     
     #randomize for fun
     #test$resid = rnorm(nrow(test), 0, 1)
     
     plot(test$dist, test$resid)
+    
+    ggplot(test, aes(x = dist, y = resid)) + geom_point() + 
+      geom_smooth(se = F, method = "lm", linetype = 2) + 
+      labs(y = "pattern (adjusted)", x = "genotypic variance")
     
     #bins
     se = function(x) sd(x) / sqrt(length(x))

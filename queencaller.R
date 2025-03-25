@@ -89,8 +89,8 @@ callqueen = function(CHR){
       #remove NAs and count
       cworkers.gt = cworkers.gt[!is.na(cworkers.gt)]
       nworker = length(cworkers.gt)
-      #require 5 non-missing
-      if(nworker < 6){
+      #require 4 non-missing
+      if(nworker < 5){
         qgt[i, col] = NA
         next
       }
@@ -140,14 +140,44 @@ callqueen = function(CHR){
   
     finalqgt = foreach(chr=1:16, .combine=rbind) %dopar%
       callqueen(chr)
-  
     
-    # sum(finalqgt1 == finalqgt2 |
-    #       is.na(finalqgt1 & is.na(finalqgt2)))
-    # 
-    # prod(dim(finalqgt1))
     
-  #Sys.time() - starttime
+#workers
+    #create data matrix
+    wgt = matrix(nrow = nrow(af), 
+                 ncol = length(unique(samples$queen_id))) %>% 
+      as.data.frame
+    colnames(wgt) = paste0(unique(samples$queen_id), "_w")
+    
+    #as numeric
+    gt3 = apply(gt2, 2, as.numeric)
+    
+    #loop through colonies
+    ucols = unique(samples$queen_id)
+    for(i in 1:length(ucols)){
+      #TODO: ensure not too many NAs
+      wgt[,i] = rowMeans(gt3[,grepl(ucols[i], colnames(gt3))], na.rm = T)
+      
+    }  
+ #TODO: average inbreeding???
+    
+       
+#combine with queens
+    
+    qwgt = cbind(finalqgt, wgt)
+    
+    qwgt.out = qwgt
+      qwgt.out[is.na(qwgt.out)] = 5
+      qwgt.out = round(qwgt.out,3)
+
+        
+    #write out simplified form
+    write.table(t(qwgt.out), file = "queenworker.geno",
+                sep = " ", col.names = F, quote = F)
+    
+    
+    
+    #rm(finalqgt, wgt)
 
 
 #write queen object 
@@ -199,57 +229,50 @@ callqueen = function(CHR){
               row.names = F, col.names = F, quote = F, sep = " ")
   
 
+
+#calc GRM
+  #remove missing > 50%
+  missing.count = colSums(is.na(qwgt))
   
-#workers
-  #create data matrix
-  wgt = matrix(nrow = nrow(af), 
-               ncol = length(unique(samples$queen_id))) %>% 
-    as.data.frame
-  colnames(wgt) = paste0(unique(samples$queen_id), "_w")
+  sum(missing.count > .5 * nrow(af))
   
-  #as numeric
-  gt3 = apply(gt2, 2, as.numeric)
+  names.remove = names(missing.count)[missing.count > .5 * nrow(af)]
+  names.remove = c(names.remove, paste0(names.remove, "_w"))
   
-  #loop through colonies
-  ucols = unique(samples$queen_id)
-  for(i in 1:length(ucols)){
-    #TODO: ensure not too many NAs
-    wgt[,i] = rowMeans(gt3[,grepl(ucols[i], colnames(gt3))], na.rm = T)
-    
-  }  
+  qwgt.filter = qwgt[,!colnames(qwgt) %in% names.remove]
+  
   
   #center by subtracting 2*f
-  wgt.c = apply(wgt, 2, function(x){
+  qwgt.c = apply(qwgt.filter, 2, function(x){
     x - (2*af$f)
   })
   
-  sum(is.na(wgt.c))
   
   #assume 0 where NA???
-    #try imputation??
-  wgt.c[is.na(wgt.c)] = 0
+  #try imputation??
+  qwgt.c[is.na(qwgt.c)] = 0
   
   #vanraiden scaling parameter
   k = 2 * sum(af$f * (1-af$f))
   
   #G matrix
-  G.w = (t(wgt.c) %*% wgt.c) / k
+  G.qw = (t(qwgt.c) %*% qwgt.c) / k
+  
+  G.qw = round(G.qw, 4)
   
   #heatmap(G.w)
   
   #fix symmetry
-  for(i in 1:dim(G.w)[1]){
+  for(i in 1:dim(G.qw)[1]){
     for(j in 1:i){
-      G.w[j,i] = G.w[i,j]
+      G.qw[j,i] = G.qw[i,j]
     }
   }
-  is.positive.definite(G.w)
+  is.positive.definite(G.qw)
+  
+  write.table(G.qw, "queenworkerGRM.txt", sep = " ",
+              quote = F)
 
-  #TODO:
-    #address diagonal (not inbreeding?)
-    #compare new to old w matrix
-    #combine with queens
-    #GWAS ... ??? 
   
   
   
