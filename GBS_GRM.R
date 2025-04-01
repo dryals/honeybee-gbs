@@ -51,8 +51,11 @@ theme_set(theme_bw())
 
   #sample threshold for 90% complete data?
   sum(!s5$bad) * 0.90
+  
+  #split in half
+  
 
-  #read in VCF
+#read in VCF
   vcf.raw = read.vcfR("data/23CBH-filter.vcf")
   vcf.raw = read.vcfR("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-filter.vcf")
 
