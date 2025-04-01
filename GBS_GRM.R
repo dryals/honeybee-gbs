@@ -63,6 +63,9 @@ setwd("~/ryals/honeybee-gbs")
     l2 = s5.split$sample_id[(h+1):nrow(s5.split)]
     write.table(l1, file = "data/split-1.txt", row.names = F, quote = F, col.names = F)
     write.table(l2, file = "data/split-2.txt", row.names = F, quote = F, col.names = F)
+    
+    #new 90% threshold
+    floor(.9 * nrow(s5.split) / 2)
   
 
 #read in VCF
