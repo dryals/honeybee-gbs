@@ -60,18 +60,28 @@ echo "launching ipyrad..."
 #     #OOM with 12G, trying 16G
 #     #finally succedded with 20G * 14 tasks
 #     
-    #manual analysis with cbh_analysis...
-    toremove=$( cat toremove.txt )
+#     #manual analysis with cbh_analysis...
+#     toremove=$( cat toremove.txt )
+#     
+#     #adjust line 21 in param file to refelct new 90% locus threshold
+#     
+#     
+#     #branch, remove samples, and output vcf
+#     ipyrad -p params-varcall-update.txt -b varcall-update-final - $toremove
+#  
+#     ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+#     
+#     
+
+#trying branching 
+    toadd=$( cat ~/ryals/honeybee-gbs/data/split-1.txt )
+    ipyrad -p params-varcall-update.txt -b varcall-update-split1 $toadd
     
-    #adjust line 21 in param file to refelct new 90% locus threshold
     
-    
-    #branch, remove samples, and output vcf
-    ipyrad -p params-varcall-update.txt -b varcall-update-final - $toremove
- 
-    ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
-    
-    
+    toadd=$( cat ~/ryals/honeybee-gbs/data/split-2.txt )
+    ipyrad -p params-varcall-update.txt -b varcall-update-split2 $toadd
+
+
     #trying s7 64G * 8 tasks on highmem
         #may need to re-run everything with stricter filtering to run this in < 24hrs
         # ... or break in half and merge vcfs later???
