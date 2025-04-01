@@ -6,6 +6,8 @@ library(purrr)
 select = dplyr::select
 theme_set(theme_bw())
 
+setwd("~/ryals/honeybee-gbs")
+
 #install.packages("foreach")
 
 #read files
@@ -53,6 +55,14 @@ theme_set(theme_bw())
   sum(!s5$bad) * 0.90
   
   #split in half
+    #randomize order
+    s5.split = s5 %>% filter(bad == F) %>% 
+      slice(sample(1:n()))
+    h = ceiling(nrow(s5.split)/2)
+    l1 = s5.split$sample_id[1:h]
+    l2 = s5.split$sample_id[(h+1):nrow(s5.split)]
+    write.table(l1, file = "data/split-1.txt", row.names = F, quote = F, col.names = F)
+    write.table(l2, file = "data/split-2.txt", row.names = F, quote = F, col.names = F)
   
 
 #read in VCF
