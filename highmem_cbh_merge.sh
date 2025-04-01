@@ -71,7 +71,6 @@ echo "launching ipyrad..."
 #  
 #     ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 #     
-#     
 
 #trying branching 
     toadd=$( cat ~/ryals/honeybee-gbs/data/split-1.txt )
