@@ -3,15 +3,15 @@
 # FILENAME: highmem_cbh_merge.sh
 
 #SBATCH -A highmem
-#SBATCH --ntasks=6
-#SBATCH --mem-per-cpu=80G
+#SBATCH --ntasks=10
+#SBATCH --mem-per-cpu=64G
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name hm_cbh_merge
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/hm_merge.out
 
 #Dylan Ryals 09 DEC 2024
-#last edited 12 MAR 2025
+#last edited 01 APR 2025
 
 date
 
@@ -71,14 +71,18 @@ echo "launching ipyrad..."
 #  
 #     ipyrad -p params-varcall-update-final.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 #     
-
-#trying branching 
-    toadd=$( cat ~/ryals/honeybee-gbs/data/split-1.txt )
-    ipyrad -p params-varcall-update.txt -b varcall-update-split1 $toadd
+# 
+# #trying branching 
+#     toadd=$( cat ~/ryals/honeybee-gbs/data/split-1.txt )
+#     ipyrad -p params-varcall-update.txt -b varcall-update-split1 $toadd
+#     
+#     
+#     toadd=$( cat ~/ryals/honeybee-gbs/data/split-2.txt )
+#     ipyrad -p params-varcall-update.txt -b varcall-update-split2 $toadd
+#     
+#     #edit both param files for new line 21
     
-    
-    toadd=$( cat ~/ryals/honeybee-gbs/data/split-2.txt )
-    ipyrad -p params-varcall-update.txt -b varcall-update-split2 $toadd
+    ipyrad -p params-varcall-update-split1.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 
 
     #trying s7 64G * 8 tasks on highmem
