@@ -82,13 +82,14 @@ echo "launching ipyrad..."
 #     
 #     #edit both param files for new line 21
     
-    ipyrad -p params-varcall-update-split1.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+    #ipyrad -p params-varcall-update-split1.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
     
-    #ipyrad -p params-varcall-update-split2.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
+    ipyrad -p params-varcall-update-split2.txt -s 7 -c $SLURM_NTASKS -d -f --MPI
 
 
     #split in half, trying 48G * 10 cores ...
         #may try more mem, less cores later... hopefully this is fast
+        #runs in about 9hrs
     
     
     #trying s7 64G * 8 tasks on highmem
