@@ -23,50 +23,50 @@ refs=/depot/bharpur/data/popgenomes/HarpurPNAS/output_snp.vcf.gz
 rename=/home/dryals/ryals/admixPipeline/chrsrename.txt
 chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
-
-
-#select samples to remove
-cd $CLUSTER_SCRATCH/gbs/23CBH
-
-
-head -n 1 23CBH_1/*consens/s5* > s5summary.txt
-sed -s 1d  */*consens/s5* >> s5summary.txt
-
-#move results into working directory
-    cp 23CBH_1/varcall-update-split*/*.vcf analysis
-
-#sort and filter vcfs
-    #this is probably too many steps :/
-    cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
-    echo "sorting input..."
-    #sort the input
-        for i in 1 2 
-        do
-            echo "    working on split ${i} ..."
-            cat varcall-update-split${i}.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' \
-                > split${i}-sorted.vcf
-            conda activate ipyrad 
-            bgzip split${i}-sorted.vcf
-            conda deactivate
-            
-            bcftools index -c split${i}-sorted.vcf.gz 
-            bcftools annotate split${i}-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force \
-                -Ob -o split${i}.bcf.gz
-            bcftools index -c split${i}.bcf.gz
-        done
-    
+# 
+# 
+# #select samples to remove
+# cd $CLUSTER_SCRATCH/gbs/23CBH
+# #head -n 1 23CBH_1/*consens/s5* > s5summary.txt
+# sed -s 1d  */*consens/s5* >> s5summary.txt
+# 
+# #move results into working directory
+#     #cp 23CBH_1/varcall-update-split*/*.vcf analysis
+# 
+# #sort and filter vcfs
+#     #this is probably too many steps :/
+#     cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
+#     echo "sorting input..."
+#     #sort the input
+#         for i in 1 2 
+#         do
+#             echo "    working on split ${i} ..."
+#             cat varcall-update-split${i}.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' \
+#                 > split${i}-sorted.vcf
+#             conda activate ipyrad 
+#             bgzip split${i}-sorted.vcf
+#             conda deactivate
+#             
+#             bcftools index -c split${i}-sorted.vcf.gz 
+#             bcftools annotate split${i}-sorted.vcf.gz --rename-chrs $rename --threads $SLURM_NTASKS --force \
+#                 -Ob -o split${i}.bcf.gz
+#             bcftools index -c split${i}.bcf.gz
+#         done
+#     
     echo "merging..."
-        bcftools merge split1.bcf.gz split2.bcf.gz -0 -Ob -o 23CBH-updated.bcf.gz
+        cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
+        
+        bcftools merge split1.bcf.gz split2.bcf.gz -0 --threads $SLURM_NTASKS -Ob -o 23CBH-updated.bcf.gz
         bcftools index -c 23CBH-updated.bcf.gz
         
-#     echo "filtering input..."
-#     #filter the input
-#         #remove missing, keep all alleles (no MAF filter)
-#         bcftools view 23CBH.bcf.gz -M2 -q 0.001:minor -e 'F_MISSING>0.10' \
-#             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
-#             --threads $SLURM_NTASKS -Ob -o 23CBH-filter.bcf.gz
+    echo "filtering input..."
+    #filter the input
+        #remove missing, keep all alleles (no MAF filter)
+        bcftools view 23CBH-updated.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' \
+            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+            --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
 #             
-#         bcftools index -c 23CBH-filter.bcf.gz
+        bcftools index -c 23CBH-updated-filter.bcf.gz
 #         
 #         #maf filter
 #         bcftools view 23CBH-filter.bcf.gz -q 0.01:minor --threads $SLURM_NTASKS -Ob -o 23CBH-maf.bcf.gz
