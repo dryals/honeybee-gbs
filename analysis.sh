@@ -38,8 +38,8 @@ module load biocontainers vcftools bcftools plink anaconda r
     rename=/home/dryals/ryals/admixPipeline/chrsrename.txt
     chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
-#     cd $CLUSTER_SCRATCH/gbs/ipyrad/bag13-final_outfiles
-#     cp bag13-final.vcf ../../analysis
+    cd $CLUSTER_SCRATCH/gbs/ipyrad/bag13-final_outfiles
+    cp bag13-final.vcf ../../analysis
 #     
      cd $CLUSTER_SCRATCH/gbs/analysis
    
