@@ -43,3 +43,14 @@ A-lin chromosome segments
     - metadata needs a lot of cleanup! 
     - have Amos turn all addresses to gps and standardize gps format?
     - 
+
+    
+### 8/25/25
+
+Raw reads were then aligned to the honeybee reference genome Amel HAV3.1, Genebank assembly accession GCA_003254395.2 (Wallberg et al., 2019), using BWA-MEM (v0.7.15; (Li, 2013)). For pool sequenced experiments the resulting BAM files were converted into pileup files using Samtools mpileup (Li and Durbin, 2009) with the parameters: -C 50 coefficient of 50 for downgrading mapping quality for reads with excessive mismatches, -q 20 minimum mapping quality of 20 for an alignment, -Q 20 and minimum base quality of 20, following standard protocols. This procedure was applied exclusively to the 6,914,704 Single Nucleotide Polymorphisms (SNPs) identified in Wragg et al. (2021) as polymorphic in the European honeybee population. The pileup files were interpreted by the PoPoolation2 utility mpileup2sync (Kofler et al., 2011) for the Sanger Fastq format, with a minimum quality of 20 and were finally converted to allele counts and sequencing depth files using a custom-made script.
+
+
+
+- samtools
+- picard -> GATK haplotype caller -> vcf
+- mpileup -> poppoolation 
