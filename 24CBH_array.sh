@@ -58,7 +58,7 @@ conda activate ipyrad
 # fi
     
 
-    k=1 #number of plates per job
+    k=2 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
     #echoing commands to stdout and logfile so progress can be tracked both places
