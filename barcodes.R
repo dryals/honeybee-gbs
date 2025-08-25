@@ -72,5 +72,18 @@ unique(bc$name)
   }
 
 
+### 24CBH barcodes
+  bc = read.delim("barcodes/24CBH/24CBH_barcodes.txt") %>% 
+    filter(!sample == "")
+    colnames(bc) = c("plate", "well", "sample", "barcodes")
+  
 
+  #write out
+  for (PLATE in unique(bc$plate)){
+    p = gsub("Plate", "", PLATE)
+    filename = paste0("barcodes/24CBH_formatted/23CBH_", p, ".txt")
+    write.table(bc %>% filter(plate == PLATE) %>% select(sample, barcodes),
+                filename,
+                row.names = F, quote = F, col.names = F, sep = '\t')
+  }
 
