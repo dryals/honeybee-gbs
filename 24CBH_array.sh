@@ -6,7 +6,7 @@
 #SBATCH --ntasks=10
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=7-00:00:00
-#SBATCH --p cpu
+#SBATCH --partition cpu
 #SBATCH --job-name 24CBH_array
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
