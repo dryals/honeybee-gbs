@@ -1,6 +1,10 @@
 library(dplyr)
 library(readxl)
 
+#Dylan Ryals 25 August 2025
+
+#TODO: edit to accept a filename argument or hardcode a filename...
+
 #read
 pileup = read.delim("data/pileuptest.out", header = F)
 
@@ -17,12 +21,17 @@ samples2 = samples
     
   }
 
+#total depth
 samples.depth = apply(samples2, 2, function(x){gsub("([0-9]*).*", "\\1", x)})
+
+#counts matching ref
 samples.ref = apply(samples2, 2, function(x){str_count(x, "[.,]")})
 
+#add location info 
 samples.depth = cbind(locations, samples.depth)
 samples.ref = cbind(locations, samples.ref)
 
+#write out
 write.table(file = "data/tmp.depth", samples.depth,
             quote = F, col.names = F, row.names = F)
 
