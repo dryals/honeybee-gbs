@@ -45,17 +45,17 @@ conda activate ipyrad
 # if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
 #     date > $log
 # 
-    #sort which plates to process
-        echo -n "" > $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
-        #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
-        #for i in 19 20 21 22 23 30 31 9
-        #for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
-        #for i in 13 14 15 16 24 25 26 27 28 29 
-        for i in 1 2 3 4 5
-        do
-            echo $i >> $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
-        done
-# fi
+#     #sort which plates to process
+#         echo -n "" > $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
+#         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
+#         #for i in 19 20 21 22 23 30 31 9
+#         #for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+#         #for i in 13 14 15 16 24 25 26 27 28 29 
+#         for i in 1 2 3 4 5
+#         do
+#             echo $i >> $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
+#         done
+# # fi
     
 
     k=2 #number of plates per job
