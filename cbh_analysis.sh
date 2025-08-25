@@ -53,51 +53,59 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #             bcftools index -c split${i}.bcf.gz
 #         done
 #     
-    echo "merging..."
-        cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
-        
-        bcftools merge split1.bcf.gz split2.bcf.gz -0 --threads $SLURM_NTASKS -Ob -o 23CBH-updated.bcf.gz
-        bcftools index -c 23CBH-updated.bcf.gz
-        
-    echo "filtering input..."
-    #filter the input
-        #remove missing, keep all alleles (no MAF filter)
-        bcftools view 23CBH-updated.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' \
-            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
-            --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
-#             
-        bcftools index -c 23CBH-updated-filter.bcf.gz
+#     echo "merging..."
+#         cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
 #         
-#         #maf filter
-#         bcftools view 23CBH-filter.bcf.gz -q 0.01:minor --threads $SLURM_NTASKS -Ob -o 23CBH-maf.bcf.gz
-#         bcftools index -c 23CBH-maf.bcf.gz
+#         bcftools merge split1.bcf.gz split2.bcf.gz -0 --threads $SLURM_NTASKS -Ob -o 23CBH-updated.bcf.gz
+#         bcftools index -c 23CBH-updated.bcf.gz
+#         
+#     echo "filtering input..."
+#     #filter the input
+#         #remove missing, keep all alleles (no MAF filter)
+#         bcftools view 23CBH-updated.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' \
+#             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+#             --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
+# #             
+#         bcftools index -c 23CBH-updated-filter.bcf.gz
+#         
+#         #how many sites?
+#         bcftools view 23CBH-updated-filter.bcf.gz | grep -v "#" | wc -l
+#             #21k sites ... not so great :/
+#             #try less stringent filtering (perhaps)... more testing required...
+#         
+# #         #maf filter
+# #         bcftools view 23CBH-filter.bcf.gz -q 0.01:minor --threads $SLURM_NTASKS -Ob -o 23CBH-maf.bcf.gz
+# #         bcftools index -c 23CBH-maf.bcf.gz
 #         
 #         
 #         #pull vcf
-#         #bcftools view 23CBH-filter.bcf.gz -Ov -o 23CBH-filter.vcf
-#         bcftools view 23CBH-maf.bcf.gz -Ov -o 23CBH-maf.vcf
+#         bcftools view 23CBH-updated-filter.bcf.gz -Ov -o 23CBH-updated-filter.vcf
+#         
 #         
 #         #pull sample names
-#         #grep "#CHROM" -m 1 23CBH.vcf > header.txt
+#         grep "#CHROM" -m 1 23CBH-updated-filter.vcf > header.txt
+# 
 #         
 #         
 #     echo "calculataing allele freqs..."
-#     bcftools view 23CBH-maf.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
+#     # see R script ... 
+#     bcftools view 23CBH-updated-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
 #             bcftools +fill-tags -Ob -o 23CBH-balanced.bcf.gz
 #             
 #     bcftools index -c 23CBH-balanced.bcf.gz
 #             
 #     bcftools view 23CBH-balanced.bcf.gz -Ou | bcftools +fill-tags -Ou | \
-#         bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH.frq
-#    
-# # #predict queen and average worker genotypes
-#     #see R script...
-#     
-#     #TODO: this isn't getting great results, double-check and debug script. 
-#     Rscript --vanilla --silent /home/dryals/ryals/honeybee-gbs/queencaller.R
-#     
-#     
-#     
+#         bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH-updated.frq
+    
+
+# #predict queen and average worker genotypes
+    #see R script...
+    
+    #TODO: this isn't getting great results, double-check and debug script. 
+    Rscript --vanilla --silent /home/dryals/ryals/honeybee-gbs/queencaller.R
+    
+    
+    
 #     #split chrs
 #     mkdir -p chrs
 #     cd chrs
@@ -107,8 +115,8 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         bcftools view ../23CBH-filter.bcf.gz -r $i -Ov -o chr${i}/23CBH-filter-${i}.vcf
 #     
 #     done
-#     
-# 
+    
+
 # #load into plink
 #     #create worker
 #     plink --vcf 23CBH-filter.vcf --make-bed --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort \
