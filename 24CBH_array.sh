@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# FILENAME: array_cbh_gbs.sh
+# FILENAME: 24CBH_array.sh
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=10
@@ -37,33 +37,34 @@ conda activate ipyrad
 #     echo -n "" > $log
 #     date > $log
 #     
+
+#additional setup if first task
+     #TODO: somehow verify task 1 has done this before continuing 
+        #just manually reset log for now...
+        #echo -n "" > $log
+# if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
+#     date > $log
 # 
-# #additional setup if first task
-#      #TODO: somehow verify task 1 has done this before continuing 
-#         #just manually reset log for now...
-#         #echo -n "" > $log
-# # if [  $SLURM_ARRAY_TASK_ID == 1 ]; then 
-# #     date > $log
-# # 
-#     #sort which plates to process
-#         echo -n "" > $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#         #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
-#         #for i in 19 20 21 22 23 30 31 9
-#         #for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
-#         for i in 13 14 15 16 24 25 26 27 28 29 
-#         #for i in 22 30
-#         do
-#             echo $i >> $CLUSTER_SCRATCH/gbs/23CBH/todo.txt
-#         done
-# # fi
+    #sort which plates to process
+        echo -n "" > $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
+        #for i in 1 2 3 4 5 6 7 8 10 11 12 17 18
+        #for i in 19 20 21 22 23 30 31 9
+        #for i in 1 2 3 4 5 6 7 8 9 10 11 12 17 18 19 20 21 22 23 30 31
+        #for i in 13 14 15 16 24 25 26 27 28 29 
+        for i in 1 2 3 4 5
+        do
+            echo $i >> $CLUSTER_SCRATCH/gbs/24CBH/todo.txt
+        done
+# fi
     
 
-    k=4 #number of plates per job
+    k=1 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
     nend=$(( $nstart + $k - 1 ))
     #echoing commands to stdout and logfile so progress can be tracked both places
     echo "task $SLURM_ARRAY_TASK_ID processing n = $nstart - $nend" >> $log
         echo "task $SLURM_ARRAY_TASK_ID processing n = $nstart - $nend"
+ 
  
 #main processing loop
 cat $CLUSTER_SCRATCH/gbs/23CBH/todo.txt | sed -n "${nstart},${nend} p" | while read P
@@ -77,7 +78,7 @@ do
 
     #copy parameter file into scratch directory
         #new working dir for this plate
-        mkdir -p $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
+        mkdir -p $CLUSTER_SCRATCH/gbs/24CBH/24CBH_${P}
         #edit param file to use plate name and save to dir
         cd ~/ryals/honeybee-gbs
         param=$( cat params/params-23CBH_PLATE.txt )
