@@ -79,6 +79,15 @@ unique(bc$name)
   bc = read.delim("barcodes/24CBH/24CBH_barcodes.txt") %>% 
     filter(!sample == "")
     colnames(bc) = c("plate", "well", "sample", "barcodes")
+    
+    mults = bc %>% group_by(sample) %>% 
+      summarise(n = n()) %>% filter(n>1) %>% select(sample)
+    
+    #unique IDs for samples with multiple workers
+    for(c in mults$sample){
+      bc$sample[bc$sample == c] = 
+        paste0(bc$sample[bc$sample == c], "_", 1:sum(bc$sample == c))
+    }
   
 
   #write out
