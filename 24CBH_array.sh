@@ -7,7 +7,7 @@
 #SBATCH --mem-per-cpu=6G
 #SBATCH --time=7-00:00:00
 #SBATCH --p cpu
-#SBATCH --job-name array_cbh_gbs
+#SBATCH --job-name 24CBH_array
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
 #SBATCH --error=/home/dryals/ryals/honeybee-gbs/outputs/dump_%a.out
 
@@ -81,44 +81,44 @@ do
         mkdir -p $CLUSTER_SCRATCH/gbs/24CBH/24CBH_${P}
         #edit param file to use plate name and save to dir
         cd ~/ryals/honeybee-gbs
-        param=$( cat params/params-23CBH_PLATE.txt )
-        echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}/params-23CBH_${P}.txt
+        param=$( cat params/params-24CBH_PLATE.txt )
+        echo "${param//PLATE/"$P"}" > $CLUSTER_SCRATCH/gbs/24CBH/24CBH_${P}/params-24CBH_${P}.txt
         
     #rename dirs and fastqs
         #_R1_ and _R2_ required in filename!!!
-        cd data/CBH2023
+        cd data/24CBH
         #rename files without underscore
-        if [ -d "23CBH${P}" ]; then
+        if [ -d "24CBH${P}" ]; then
             echo "renaming dir"
-            mv 23CBH${P} 23CBH_${P}
-            cd 23CBH_${P}
-            mv 23CBH${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
-            mv 23CBH${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
+            mv 24CBH${P} 24CBH_${P}
+            cd 24CBH_${P}
+            mv 24CBH${P}_L1_1.fq.gz 24CBH_${P}_R1_.fastq.gz
+            mv 24CBH${P}_L1_2.fq.gz 24CBH_${P}_R2_.fastq.gz
             cd ..
         fi
         #exit if file not found
         #ls *CBH_${P} &> /dev/null || ( echo "dir for ${P} does not exist" ; exit )
         #rename dirs without year code
-        if [ -d "CBH_${P}" ]; then
-            echo "renaming dir"
-            mv CBH_${P} 23CBH_${P}
-            cd 23CBH_${P}
-            mv CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
-            mv CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
-            cd ..
-        fi
-        #rename dirs with year code
-        if [ -f "23CBH_${P}/23CBH_${P}_1.fq.gz" ]; then
-            echo "renaming fastq"
-            cd 23CBH_${P}
-            mv 23CBH_${P}_1.fq.gz 23CBH_${P}_R1_.fastq.gz
-            mv 23CBH_${P}_2.fq.gz 23CBH_${P}_R2_.fastq.gz
-            cd ..
-        fi    
+#         if [ -d "CBH_${P}" ]; then
+#             echo "renaming dir"
+#             mv CBH_${P} 24CBH_${P}
+#             cd 24CBH_${P}
+#             mv CBH_${P}_1.fq.gz 24CBH_${P}_R1_.fastq.gz
+#             mv CBH_${P}_2.fq.gz 24CBH_${P}_R2_.fastq.gz
+#             cd ..
+#         fi
+#         #rename dirs with year code
+#         if [ -f "24CBH_${P}/24CBH_${P}_1.fq.gz" ]; then
+#             echo "renaming fastq"
+#             cd 24CBH_${P}
+#             mv 24CBH_${P}_1.fq.gz 24CBH_${P}_R1_.fastq.gz
+#             mv 24CBH_${P}_2.fq.gz 24CBH_${P}_R2_.fastq.gz
+#             cd ..
+#         fi    
 
     #ipyrad
-        cd $CLUSTER_SCRATCH/gbs/23CBH/23CBH_${P}
-        ipyrad -p params-23CBH_${P}.txt -s 12345 -c $SLURM_NTASKS -d -f --MPI
+        cd $CLUSTER_SCRATCH/gbs/24CBH/24CBH_${P}
+        ipyrad -p params-24CBH_${P}.txt -s 123 -c $SLURM_NTASKS -d -f --MPI
         
         
             #s1 8 cores * 10GB work, not minimum

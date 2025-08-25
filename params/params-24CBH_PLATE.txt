@@ -1,7 +1,7 @@
 ------- ipyrad params file (v.0.9.95)-------------------------------------------
 24CBH_PLATE                    ## [0] [assembly_name]: Assembly name. Used to name output directories for assembly steps
 /scratch/negishi/dryals/gbs/24CBH/24CBH_PLATE ## [1] [project_dir]: Project dir (made in curdir if not present)
-/home/dryals/ryals/honeybee-gbs/data/24CBH/23CBHPLATE/*fastq.gz   ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
+/home/dryals/ryals/honeybee-gbs/data/24CBH/23CBH_PLATE/*fastq.gz   ## [2] [raw_fastq_path]: Location of raw non-demultiplexed fastq files
 /home/dryals/ryals/honeybee-gbs/barcodes/24CBH_formatted/24CBH_PLATE.txt  ## [3] [barcodes_path]: Location of barcodes file
                                ## [4] [sorted_fastq_path]: Location of demultiplexed/sorted fastq files
 reference                      ## [5] [assembly_method]: Assembly method (denovo, reference)
