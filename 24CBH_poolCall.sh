@@ -25,16 +25,19 @@ module load biocontainers samtools
 
 
 #grab some sites
+    #a quick test...
 
-cd /scratch/negishi/dryals/gbs/24CBH/analysis
+    cd /scratch/negishi/dryals/gbs/24CBH/analysis
 
-samtools mpileup -b test.samps \
-    -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
-    -C 50 -q 20 -Q 20 -l test.sites \
-    -o pileuptest.out
-
-
-#use R script to translate into beethoven format
+    samtools mpileup -b test.samps \
+        -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
+        -C 50 -q 20 -Q 20 -l test.sites \
+        -o pileuptest.out
+    #use R script to translate into beethoven format
+    
+    
+#testing on a single plate ...
+    
 
     
 ######

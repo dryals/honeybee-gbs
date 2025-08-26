@@ -57,6 +57,7 @@ conda activate ipyrad
 #         done
 # # fi
     
+    #WARNING: this will wrap and overwrite earlier tasks, be careful!
 
     k=2 #number of plates per job
     nstart=$((( $SLURM_ARRAY_TASK_ID - 1 ) * $k + 1))
