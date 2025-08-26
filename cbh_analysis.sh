@@ -61,7 +61,7 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         
 #     echo "filtering input..."
 #     #filter the input
-#         #remove missing, keep all alleles (no MAF filter)
+#         #remove missing, keep all alleles
 #         bcftools view 23CBH-updated.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' \
 #             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
 #             --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
