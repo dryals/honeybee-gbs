@@ -68,45 +68,58 @@ setwd("~/ryals/honeybee-gbs")
     floor(.9 * nrow(s5.split) / 2)
   
 
-#read in VCF
-  vcf.raw = read.vcfR("data/23CBH-filter.vcf")
-  vcf.raw = read.vcfR("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-filter.vcf")
-
-  #convert to dosage
-    gt = extract.gt(vcf.raw)
-
-    gt2 = gt
-      gt2[gt == "0/0"] = "0"
-      gt2[gt2 == "1/1"] = "2"
-      gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
-      gt2 = as.data.frame(gt2)
-
-    rm(gt, vcf.raw)
+# #read in VCF
+#   vcf.raw = read.vcfR("data/23CBH-filter.vcf")
+#   vcf.raw = read.vcfR("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-filter.vcf")
+# 
+#   #convert to dosage
+#     gt = extract.gt(vcf.raw)
+# 
+#     gt2 = gt
+#       gt2[gt == "0/0"] = "0"
+#       gt2[gt2 == "1/1"] = "2"
+#       gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
+#       gt2 = as.data.frame(gt2)
+# 
+#     rm(gt, vcf.raw)
 
   
   #read in pedigree
-  pheno = read.csv("data/CBH_raw_phenotypes.csv") %>% 
-    mutate(colony_id = str_pad(colony_id, 3, "left", "0"))
+  pheno = read.csv("data/preblup.csv")
+    pheno$queen_id = NA
+    pheno$queen_id[grepl("23_", pheno$colony_id)] = 
+      gsub("23_", "23CBH", pheno$colony_id[grepl("23_", pheno$colony_id)])
+    pheno$queen_id[grepl("24_", pheno$colony_id)] = 
+      gsub("24_", "24CBH", pheno$colony_id[grepl("24_", pheno$colony_id)])
   
-  samples = samples %>% left_join(pheno %>% select(colony_id, breeder, apiary_id))
+  samples = samples %>% left_join(pheno %>% select(queen_id, breeder, apiary_id))
   
-  # #create representative sample: 10 colonies from each breeder
-  #   #TODO: consider locations??
-  # set.seed(123)
-  # balance = samples %>% group_by(breeder) %>%
-  #   summarise(colony_id = unique(colony_id)) %>%
-  #   slice_sample(n = 10) %>%
-  #   left_join(samples)
-  # 
-  # #write out for analysis
-  # write.table(balance$sample_id, file = "data/balanceSet.txt",
-  #             quote = F, row.names = F, col.names = F)
+  #create representative sample: 5 colonies from each breeder
+    #TODO: consider locations??
+  set.seed(123)
+  balance = samples %>% 
+    filter(!is.na(breeder)) %>% 
+    group_by(breeder, colony_id) %>%
+    slice(1) %>% 
+    ungroup %>% group_by(breeder) %>% 
+    slice_sample(n = 5) %>% 
+    select(-sample_id)
+  
+  balance.samples = samples %>% filter(colony_id %in% balance$colony_id) %>% 
+    select(sample_id)
+
+  #write out for analysis
+  write.table(balance.samples$sample_id, file = "data/balanceSet.txt",
+              quote = F, row.names = F, col.names = F)
 
   #calculate allele freq for representative sample
   
-  # #read in allele frequencies ...
-  # af = read.delim("data/23CBH.frq", header = F) 
-  #   colnames(af) = c("chr", "pos", "f")
+  #read in allele frequencies ...
+  af = read.delim("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-updated.frq", header = F)
+    colnames(af) = c("chr", "pos", "f")
+    #lost sites due to sampling 
+    sum(af$f == 0)
+  
   #   af$maf = af$f
   #   af$maf[af$f > 0.5] = 1 - af$maf[af$f > 0.5]
   #   

@@ -24,13 +24,19 @@ samples = read.delim("header.txt", header = F) %>% t() %>%
   # filter(n < 7) %>%  ungroup %>% arrange(n) 
 
 #read in allele frequencies ...
-af = read.delim("23CBH.frq", header = F) 
-  colnames(af) = c("chr", "pos", "f")
+af.raw = read.delim("23CBH-updated.frq", header = F) 
+  colnames(af.raw) = c("chr", "pos", "f")
   #af = af %>% filter(chr == chrno)
+  
+  #remove zeros
+  sum(af.raw$f == 0)
+  
+  af = af.raw[af.raw$f != 0,]
 
-#read in genotypes
+
+  #read in genotypes
   #vcf.raw = read.vcfR(paste0("chrs/chr",chrno,"/23CBH-filter-", chrno, ".vcf"))
-  vcf.raw = read.vcfR("23CBH-maf.vcf")
+  vcf.raw = read.vcfR("23CBH-updated-filter.vcf")
   
   
   #convert to dosage
@@ -43,6 +49,9 @@ af = read.delim("23CBH.frq", header = F)
   gt2 = as.data.frame(gt2)
   
   rm(gt, vcf.raw)
+  
+  #remove zeros
+    gt2 = gt2[af.raw$f != 0,]
   
   
   
@@ -84,6 +93,9 @@ callqueen = function(CHR){
 
     #loop through colonies
     for (col in colnames(qgt)){
+      
+      #TODO: use pedigree information?
+      
       #pull genotypes
       cworkers.gt = as.numeric(gt2.chr[i, grepl(col, colnames(gt2.chr))])
       #remove NAs and count
@@ -166,113 +178,125 @@ callqueen = function(CHR){
     
     qwgt = cbind(finalqgt, wgt)
     
-    qwgt.out = qwgt
+    #switch to ref allele instead of alt
+    qwgt.ref = 2-qwgt
+    
+    qwgt.out = qwgt.ref
       qwgt.out[is.na(qwgt.out)] = 5
-      qwgt.out = round(qwgt.out,3)
-
+      qwgt.out = round(qwgt.out,4)
+      
         
-    #write out simplified form
-    write.table(t(qwgt.out), file = "queenworker.geno",
-                sep = " ", col.names = F, quote = F)
+    # #write out simplified form
+    # write.table(t(qwgt.out), file = "queenworker.geno",
+    #             sep = " ", col.names = F, quote = F)
+    
+    #different format to combine wtih poolseq data
+      #TODO: ensure these are the correct positions!
+    gencomb = cbind(af$chr, af$pos, qwgt.out)
+      names(gencomb)[1:2] = c("chr", "pos")
+    
+    write.table(gencomb, file = "23CBH_qw_ref.geno",
+                sep = " ", col.names = T, quote = F, row.names = F)
     
     
     
-    #rm(finalqgt, wgt)
-
-
-#write queen object 
-  #write queen for plink .ped
-  pt1 = data.frame(FID = names(finalqgt), IID = names(finalqgt)) %>% 
-    mutate(father = 0, mother = 0, sex = 2, pheno = 0)
-  
-  pt2 = t(finalqgt)
-  pt2[pt2 == 0] = "TT"
-  pt2[pt2 == 1] = "AT"
-  pt2[pt2 == 2] = "AA"
-  pt2[is.na(pt2)] = "00"
-  
-  qgt.out = cbind(pt1, pt2)
-  
-  write.table(qgt.out, "qgt.ped", 
-              row.names = F, col.names = F, quote = F, sep = " ")
-  #write .map file
-  map = af %>% 
-    mutate(variant = paste0(chr, ":", pos),
-           cm = 0) %>% 
-    select(chr, variant, cm, pos)
-  
-  write.table(map, "qgt.map", 
-              row.names = F, col.names = F, quote = F, sep = " ")
-  
-#write raw worker object
-  #write worker for plink .ped
-  pt1 = data.frame(FID = colnames(gt2), IID = colnames(gt2)) %>% 
-    mutate(father = 0, mother = 0, sex = 2, pheno = 0)
-  
-  pt2 = t(gt2)
-  pt2[pt2 == 0] = "TT"
-  pt2[pt2 == 1] = "AT"
-  pt2[pt2 == 2] = "AA"
-  pt2[is.na(pt2)] = "00"
-  
-  wgt.out = cbind(pt1, pt2)
-  
-  write.table(wgt.out, "wgt.ped", 
-              row.names = F, col.names = F, quote = F, sep = " ")
-  #write .map file
-  map = af %>% 
-    mutate(variant = paste0(chr, ":", pos),
-           cm = 0) %>% 
-    select(chr, variant, cm, pos)
-  
-  write.table(map, "wgt.map", 
-              row.names = F, col.names = F, quote = F, sep = " ")
-  
-
-
-#calc GRM
-  #remove missing > 50%
-  missing.count = colSums(is.na(qwgt))
-  
-  sum(missing.count > .5 * nrow(af))
-  
-  names.remove = names(missing.count)[missing.count > .5 * nrow(af)]
-  names.remove = c(names.remove, paste0(names.remove, "_w"))
-  
-  qwgt.filter = qwgt[,!colnames(qwgt) %in% names.remove]
-  
-  
-  #center by subtracting 2*f
-  qwgt.c = apply(qwgt.filter, 2, function(x){
-    x - (2*af$f)
-  })
-  
-  
-  #assume 0 where NA???
-  #try imputation??
-  qwgt.c[is.na(qwgt.c)] = 0
-  
-  #vanraiden scaling parameter
-  k = 2 * sum(af$f * (1-af$f))
-  
-  #G matrix
-  G.qw = (t(qwgt.c) %*% qwgt.c) / k
-  
-  G.qw = round(G.qw, 4)
-  
-  #heatmap(G.w)
-  
-  #fix symmetry
-  for(i in 1:dim(G.qw)[1]){
-    for(j in 1:i){
-      G.qw[j,i] = G.qw[i,j]
-    }
-  }
-  is.positive.definite(G.qw)
-  
-  write.table(G.qw, "queenworkerGRM.txt", sep = " ",
-              quote = F)
-
-  
+#     
+#     #rm(finalqgt, wgt)
+# 
+# 
+# #write queen object 
+#   #write queen for plink .ped
+#   pt1 = data.frame(FID = names(finalqgt), IID = names(finalqgt)) %>% 
+#     mutate(father = 0, mother = 0, sex = 2, pheno = 0)
+#   
+#   pt2 = t(finalqgt)
+#   pt2[pt2 == 0] = "TT"
+#   pt2[pt2 == 1] = "AT"
+#   pt2[pt2 == 2] = "AA"
+#   pt2[is.na(pt2)] = "00"
+#   
+#   qgt.out = cbind(pt1, pt2)
+#   
+#   write.table(qgt.out, "qgt.ped", 
+#               row.names = F, col.names = F, quote = F, sep = " ")
+#   #write .map file
+#   map = af %>% 
+#     mutate(variant = paste0(chr, ":", pos),
+#            cm = 0) %>% 
+#     select(chr, variant, cm, pos)
+#   
+#   write.table(map, "qgt.map", 
+#               row.names = F, col.names = F, quote = F, sep = " ")
+#   
+# #write raw worker object
+#   #write worker for plink .ped
+#   pt1 = data.frame(FID = colnames(gt2), IID = colnames(gt2)) %>% 
+#     mutate(father = 0, mother = 0, sex = 2, pheno = 0)
+#   
+#   pt2 = t(gt2)
+#   pt2[pt2 == 0] = "TT"
+#   pt2[pt2 == 1] = "AT"
+#   pt2[pt2 == 2] = "AA"
+#   pt2[is.na(pt2)] = "00"
+#   
+#   wgt.out = cbind(pt1, pt2)
+#   
+#   write.table(wgt.out, "wgt.ped", 
+#               row.names = F, col.names = F, quote = F, sep = " ")
+#   #write .map file
+#   map = af %>% 
+#     mutate(variant = paste0(chr, ":", pos),
+#            cm = 0) %>% 
+#     select(chr, variant, cm, pos)
+#   
+#   write.table(map, "wgt.map", 
+#               row.names = F, col.names = F, quote = F, sep = " ")
+#   
+# 
+# 
+# #calc GRM
+#   #remove missing > 50%
+#   missing.count = colSums(is.na(qwgt))
+#   
+#   sum(missing.count > .5 * nrow(af))
+#   
+#   names.remove = names(missing.count)[missing.count > .5 * nrow(af)]
+#   names.remove = c(names.remove, paste0(names.remove, "_w"))
+#   
+#   qwgt.filter = qwgt[,!colnames(qwgt) %in% names.remove]
+#   
+#   
+#   #center by subtracting 2*f
+#   qwgt.c = apply(qwgt.filter, 2, function(x){
+#     x - (2*af$f)
+#   })
+#   
+#   
+#   #assume 0 where NA???
+#     #try imputation??
+#   qwgt.c[is.na(qwgt.c)] = 0
+#   
+#   #vanraiden scaling parameter
+#   k = 2 * sum(af$f * (1-af$f))
+#   
+#   #G matrix
+#   G.qw = (t(qwgt.c) %*% qwgt.c) / k
+#   
+#   G.qw = round(G.qw, 4)
+#   
+#   #heatmap(G.w)
+#   
+#   #fix symmetry
+#   for(i in 1:dim(G.qw)[1]){
+#     for(j in 1:i){
+#       G.qw[j,i] = G.qw[i,j]
+#     }
+#   }
+#   is.positive.definite(G.qw)
+#   
+#   write.table(G.qw, "queenworkerGRM.txt", sep = " ",
+#               quote = F)
+# 
+#   
   
   
