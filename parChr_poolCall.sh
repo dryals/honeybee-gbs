@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=6G
+#SBATCH --mem-per-cpu=8G
 #SBATCH --time=2-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name par_poolCall
