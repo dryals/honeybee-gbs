@@ -5,7 +5,7 @@
 #SBATCH -A bharpur
 #SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=12G
-#SBATCH --time=7-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name poolCall
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pool.out
