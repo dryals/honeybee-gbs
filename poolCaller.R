@@ -6,6 +6,7 @@ library(tidyverse)
 
 #TODO:
   #edit to accept a filename argument or hardcode a filename...
+  #use parallel processing and/or save intermediate files
 
 setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
@@ -73,6 +74,7 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
     
     #use max prob to call queen genotype
       #probably faster as apply functions
+      #could re-write to run chrs in parallel
     for(l in 1:nrow(queens.geno)){
       for(c in 1:ncol(queens.geno)){
         f = frq[l]
@@ -93,15 +95,15 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
   
     #read in 2023 genotypes
   
-    #ensure both years use REF or ALT ...
+    #ensure both years use REF or ALT; ensure sites are identical 
   
     #search for and resolve duplicated individuals
   
     #combine into massive matrix
   
-    #calculate GRM
+#calculate GRM
   
-  #write out...
+#write out...
   
 
     

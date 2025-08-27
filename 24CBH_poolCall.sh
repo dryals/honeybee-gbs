@@ -107,10 +107,6 @@ module load biocontainers samtools bcftools
 #     --fastq-type sanger --min-qual 20 --threads 8
 
     
-    head -n 1 queenworker.geno | tr " " "\n" | tail
-    
-
-    
 ######
 echo "DONE"
 date
