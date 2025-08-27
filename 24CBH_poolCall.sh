@@ -93,7 +93,8 @@ module load biocontainers samtools bcftools
     
     samtools mpileup -b 24CBHpool.bamlist \
     -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
-    -C 50 -q 20 -Q 20 -l 23CBH-t.sites \
+    -l 23CBH-t.sites \
+    -C 50 -q 20 -Q 20 -d 200 \
     -a -o 24CBH.mpileup
 
 
