@@ -3,8 +3,8 @@
 # FILENAME: 24CBH_poolCall.sh
 
 #SBATCH -A bharpur
-#SBATCH --ntasks=8
-#SBATCH --mem-per-cpu=6G
+#SBATCH --ntasks=1
+#SBATCH --mem-per-cpu=12G
 #SBATCH --time=7-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name poolCall
@@ -82,11 +82,16 @@ module load biocontainers samtools bcftools
 
 
 #all 2024 data together, will likely take ages to run
+    echo "mpileup..."
     cd /scratch/negishi/dryals/gbs/24CBH/analysis
     
+    #list all samples
     ls $CLUSTER_SCRATCH/gbs/24CBH/24CBH_*/*_refmapping/*.bam > 24CBH.bamlist
-
-    samtools mpileup -b 24CBH.bamlist \
+    
+    #remove singlebee samples, these should be added to previous year run
+    grep -vE "*23CBH[0-9]{3}_[0-9]-mapped*" 24CBH.bamlist > 24CBHpool.bamlist
+    
+    samtools mpileup -b 24CBHpool.bamlist \
     -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
     -C 50 -q 20 -Q 20 -l 23CBH-t.sites \
     -a -o 24CBH.mpileup
