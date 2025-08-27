@@ -1,4 +1,5 @@
 library(tidyverse)
+library(doParallel)
 
 #Dylan Ryals 25 AUG 2025
 
@@ -8,9 +9,10 @@ library(tidyverse)
   #edit to accept a filename argument or hardcode a filename...
   #use parallel processing and/or save intermediate files
 
-setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
+#setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
-sync = read.delim("24CBH.sync", sep = "", header = F)
+#sync = read.delim("24CBH.sync", sep = "", header = F)
+sync = read.delim("data/test4.sync", sep = "", header = F)
 
   #count total depth, ignoring N and indels
   sync.g = sync[,-(1:3)]
@@ -45,11 +47,13 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
   }
 
   samples.ref = apply(sync.g, 2, countref) 
+  
+  sync.c = sync[,1]
 
 
 #call queen genotypes
-  queens.geno = samples.depth
-    queens.geno[,] = NA
+  # queens.geno = samples.depth
+  #   queens.geno[,] = NA
 # 
 #     #MLE of allele freq at site, VERY SLOW and hardly different
 #     MLE = function(l){
@@ -72,22 +76,44 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
 
     frq = rowSums(samples.ref) / rowSums(samples.depth)
     
-    #use max prob to call queen genotype
-      #probably faster as apply functions
-      #could re-write to run chrs in parallel
-    for(l in 1:nrow(queens.geno)){
-      for(c in 1:ncol(queens.geno)){
-        f = frq[l]
-        #probability 2 ref alleles
-              #prob q is gt  #prob worker obs given q is gt and f
-        pg2 = f**2 *          dbinom(samples.ref[l,c], samples.depth[l,c], (f + 1)/2)
-        pg1 = 2*(f * (1-f)) * dbinom(samples.ref[l,c], samples.depth[l,c], (f + 0.5)/2)
-        pg0 = (1-f)**2 *      dbinom(samples.ref[l,c], samples.depth[l,c],  f/2)
+    
+    allchrs = unique(sync.c)
+    
+  #use max prob to call queen genotype
+  callQueenPool = function(CHR){
+    #just sites within CHR
+    samples.depth.chr = samples.depth[sync.c==CHR,]
+    samples.ref.chr = samples.ref[sync.c==CHR,]
+    frq.chr = frq[sync.c==CHR]
+    queens.geno.chr = samples.ref.chr
+      queens.geno.chr[,] = NA
+    #loop sites
+    for(l in 1:nrow(queens.geno.chr)){
+      #loop colonies 
+      for(c in 1:ncol(queens.geno.chr)){
+        #ref allele freq at site
+        f = frq.chr[l]
+        #probability of each potential queen genotype
+              #prob q is gt  *prob worker obs given q is gt and f
+        pg2 = f**2 *          dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 1)/2)
+        pg1 = 2*(f * (1-f)) * dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 0.5)/2)
+        pg0 = (1-f)**2 *      dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c],  f/2)
         
-        queens.geno[l,c] = c(2,1,0)[which.max(c(pg2, pg1, pg0))]
+        queens.geno.chr[l,c] = c(2,1,0)[which.max(c(pg2, pg1, pg0))]
       }
     }
-    
+    return(cbind(sync[sync.c==CHR,1:2],queens.geno.chr))
+  }
+  
+  registerDoParallel(cores = 8)
+  
+  finalqgt = foreach(chr=allchrs, .combine=rbind) %dopar%
+    callQueenPool(chr)
+  
+  sum(finalqgt[,1:2] == sync[,1:2])
+   
+  
+   
   workers.geno = round(samples.ref / samples.depth, 4)
   
   #combine workers and queens, rename with _w...

@@ -17,6 +17,10 @@
 #parallelized by chromosome
 #determining sequence depth and ref allele count for pooled samples
 
+    #can this be extended to do the other operations?
+        #sync
+        #queen/worker genotyping 
+
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/par_pool.out
 
