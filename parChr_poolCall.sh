@@ -20,6 +20,12 @@
 
 log=/home/dryals/ryals/honeybee-gbs/outputs/par_pool.out
 
+#reset log if first task
+    if [ $SLURM_ARRAY_TASK_ID == 1 ]
+    then 
+        date > 1
+    fi
+
 #####
 
 module load biocontainers samtools
@@ -36,7 +42,7 @@ module load biocontainers samtools
     
     echo "starting chr $chrShort" >> $log
     
-    samtools mpileup -b ../../24CBHpool.bamlist \
+    samtools mpileup -b ../../test.samps \
     -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
     -l 23CBH_chr${chrShort}.sites \
     -C 50 -q 20 -Q 20 -d 200 \
