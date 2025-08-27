@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=12G
+#SBATCH --mem-per-cpu=10G
 #SBATCH --time=2-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name par_poolCall
@@ -23,7 +23,7 @@ log=/home/dryals/ryals/honeybee-gbs/outputs/par_pool.out
 #reset log if first task
     if [ $SLURM_ARRAY_TASK_ID == 1 ]
     then 
-        date > 1
+        date > $log
     fi
 
 #####
