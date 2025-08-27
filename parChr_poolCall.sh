@@ -43,6 +43,8 @@ module load biocontainers samtools
     -a -o 24CBH_chr${chrShort}.mpileup
     
     echo "FINISHED chr $chrShort" >> $log
+    
+#    echo -n "" > /home/dryals/ryals/honeybee-gbs/outputs/par_pool.out
 
 
 #ON LOCAL MACHINE
