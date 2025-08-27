@@ -90,14 +90,17 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
     
   workers.geno = round(samples.ref / samples.depth, 4)
   
+  #combine workers and queens, rename with _w...
+  
   
 #combine with 2023 genotypes .... 
   
     #read in 2023 genotypes
   
-    #ensure both years use REF or ALT; ensure sites are identical 
-  
-    #search for and resolve duplicated individuals
+    #ensure both years use REF or ALT
+      #ensure sites are identical
+      #compare allele freqs between years
+      #search for and resolve duplicated queens/colonies
   
     #combine into massive matrix
   
@@ -107,6 +110,11 @@ sync = read.delim("24CBH.sync", sep = "", header = F)
   
 
     
+  
+  
+  
+  
+  
     
     #OLD pileup code
     # #read and format pileup results

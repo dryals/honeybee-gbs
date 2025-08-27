@@ -78,10 +78,11 @@ module load biocontainers samtools bcftools
 # 
 #     date
 #     
-#parallel processig by sample probably, pasting all togehter at end
 
 
 #all 2024 data together, will likely take ages to run
+    #this could easily be broken up by chr 
+    
     echo "mpileup..."
     cd /scratch/negishi/dryals/gbs/24CBH/analysis
     
@@ -91,11 +92,9 @@ module load biocontainers samtools bcftools
     #remove singlebee samples, these should be added to previous year run
     grep -vE "*23CBH[0-9]{3}_[0-9]-mapped*" 24CBH.bamlist > 24CBHpool.bamlist
     
-    samtools mpileup -b 24CBHpool.bamlist \
-    -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
-    -l 23CBH-t.sites \
-    -C 50 -q 20 -Q 20 -d 200 \
-    -a -o 24CBH.mpileup
+    #START PARALLEL
+    
+
 
 
 #ON LOCAL MACHINE
