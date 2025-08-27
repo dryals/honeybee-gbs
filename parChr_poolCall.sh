@@ -4,7 +4,7 @@
 
 #SBATCH -A bharpur
 #SBATCH --ntasks=1
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem-per-cpu=6G
 #SBATCH --time=2-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name par_poolCall
@@ -40,7 +40,7 @@ module load biocontainers samtools
     -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
     -l 23CBH_chr${chrShort}.sites \
     -C 50 -q 20 -Q 20 -d 200 \
-    -a -o 24CBHchr${chrShort}.mpileup
+    -a -o 24CBH_chr${chrShort}.mpileup
     
     echo "FINISHED chr $chrShort" >> $log
 
