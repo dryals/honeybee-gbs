@@ -7,8 +7,9 @@ library(tidyverse)
 #TODO:
   #edit to accept a filename argument or hardcode a filename...
 
+setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
-sync = read.delim("data/test4.sync", sep = "", header = F)
+sync = read.delim("24CBH.sync", sep = "", header = F)
 
   #count total depth, ignoring N and indels
   sync.g = sync[,-(1:3)]
@@ -88,8 +89,19 @@ sync = read.delim("data/test4.sync", sep = "", header = F)
   workers.geno = round(samples.ref / samples.depth, 4)
   
   
+#combine with 2023 genotypes .... 
   
-#write out...
+    #read in 2023 genotypes
+  
+    #ensure both years use REF or ALT ...
+  
+    #search for and resolve duplicated individuals
+  
+    #combine into massive matrix
+  
+    #calculate GRM
+  
+  #write out...
   
 
     

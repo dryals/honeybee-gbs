@@ -5,7 +5,7 @@
 #SBATCH -A bharpur
 #SBATCH --ntasks=1
 #SBATCH --mem-per-cpu=12G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --partition cpu
 #SBATCH --job-name poolCall
 #SBATCH --output=/home/dryals/ryals/honeybee-gbs/outputs/pool.out
@@ -106,6 +106,8 @@ module load biocontainers samtools bcftools
 #     --input pileuptest4.out --output test4.sync \
 #     --fastq-type sanger --min-qual 20 --threads 8
 
+    
+    head -n 1 queenworker.geno | tr " " "\n" | tail
     
 
     
