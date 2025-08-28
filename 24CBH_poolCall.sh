@@ -99,11 +99,11 @@ module load biocontainers samtools bcftools
 
 #ON LOCAL MACHINE
 
-#     PPP=/home/dylan/Documents/bees/harpurlab/project/gensel/poPoolation2/popoolation2_1201
-# 
-#     java -ea -Xmx7g -jar $PPP/mpileup2sync.jar \
-#     --input pileuptest4.out --output test4.sync \
-#     --fastq-type sanger --min-qual 20 --threads 8
+    PPP=/home/dylan/Documents/bees/harpurlab/project/gensel/poPoolation2/popoolation2_1201
+
+    java -ea -Xmx7g -jar $PPP/mpileup2sync.jar \
+    --input 24CBH.mpileup --output 24CBH.sync \
+    --fastq-type sanger --min-qual 20 --threads 8
 
     
 ######

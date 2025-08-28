@@ -54,3 +54,9 @@ Raw reads were then aligned to the honeybee reference genome Amel HAV3.1, Geneba
 - samtools
 - picard -> GATK haplotype caller -> vcf
 - mpileup -> poppoolation 
+
+
+### 8/28/25
+
+consider ld pruning total sites, this might get better relatedness estimates? 
+    or use KING or something?
