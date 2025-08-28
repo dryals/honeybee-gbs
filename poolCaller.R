@@ -1,5 +1,7 @@
 library(tidyverse)
 library(doParallel)
+library(matrixcalc)
+library(AGHmatrix)
 
 #Dylan Ryals 25 AUG 2025
 
@@ -7,12 +9,16 @@ library(doParallel)
 
 #TODO:
   #edit to accept a filename argument or hardcode a filename...
-  #use parallel processing and/or save intermediate files
+  #doulbe check 
 
-#setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
+setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
-#sync = read.delim("24CBH.sync", sep = "", header = F)
-sync = read.delim("data/test4.sync", sep = "", header = F)
+sync = read.delim("24CBH.sync", sep = "", header = F)
+#sync = read.delim("data/test4.sync", sep = "", header = F)
+
+#sample names
+sampnames = read.delim("24CBHpool.bamlist", header = F)
+  sampnames = gsub(".*refmapping/([0-9A-Za-z]*)[-].*", "\\1", sampnames$V1)
 
   #count total depth, ignoring N and indels
   sync.g = sync[,-(1:3)]
@@ -105,32 +111,174 @@ sync = read.delim("data/test4.sync", sep = "", header = F)
     return(cbind(sync[sync.c==CHR,1:2],queens.geno.chr))
   }
   
-  registerDoParallel(cores = 8)
+  registerDoParallel(cores = 16)
   
   finalqgt = foreach(chr=allchrs, .combine=rbind) %dopar%
     callQueenPool(chr)
   
-  sum(finalqgt[,1:2] == sync[,1:2])
-   
+  colnames(finalqgt) = c("chr", "pos", sampnames)
   
-   
+  sum(finalqgt[,1:2] == sync[,1:2])
+  
+  #workers
   workers.geno = round(samples.ref / samples.depth, 4)
+  colnames(workers.geno) = paste0(sampnames, "_w")
   
   #combine workers and queens, rename with _w...
+  qwgt24 = cbind(finalqgt, workers.geno)
   
   
 #combine with 2023 genotypes .... 
   
     #read in 2023 genotypes
-  
+  qwgt23 = read.delim("../../23CBH/analysis/23CBH_qw_ref.geno", sep = " ")
+    colnames(qwgt23) = gsub("X", "", colnames(qwgt23))
+    
     #ensure both years use REF or ALT
       #ensure sites are identical
-      #compare allele freqs between years
-      #search for and resolve duplicated queens/colonies
-  
+    chrrename = read.delim("chrsrename.txt", header = F, sep = "")
+      colnames(chrrename) = c("chr", "long")
+      
+    qwgt23 = qwgt23 %>% left_join(chrrename) %>% 
+      select(chr = long, pos, starts_with("23"))
+    
+    qwgt23[qwgt23 == 5] = NA
+    
     #combine into massive matrix
+    
+    qwgt.c = qwgt23 %>% left_join(qwgt24, by = c("chr", "pos"))
+    
+    dim(qwgt.c)
+    
+    2 * (sum(!grepl("_w", colnames(qwgt23))) + 
+           sum(!grepl("_w", colnames(qwgt24))) - 4)
+    
+    #TODO: compare allele freqs between years
+    
+      #search for and resolve duplicated queens/colonies
+        queennames = data.frame(full = colnames(qwgt.c)[-(1:2)])
+          queennames = queennames %>% 
+            filter(!grepl("_w", full)) %>% 
+            mutate(short = gsub("^2[34]", "", full)) %>% 
+            group_by(short) %>% 
+            summarise(n = n())
+          
+          #065, 193, 221, II96 are duplicated ...
+          #leave in for now, run GRM, and see if they're related!
   
 #calculate GRM
+#TODO: double check this method!
+# try loading genotypes into PLINK and using KING est?
+          
+    qwgt.grm = qwgt.c[,-(1:2)]
+    
+    #try flipping to alt allele??
+    qwgt.grm = 2 - qwgt.grm
+    
+    #remove missing > 50%
+    missing.count = colSums(is.na(qwgt.grm))
+
+    sum(missing.count > .5 * nrow(qwgt.grm))
+
+    names.remove = names(missing.count)[missing.count > .5 * nrow(qwgt.grm)]
+    #add some problematic samples
+    names.remove = c(names.remove, "23CBH001", "23CBH246", "23CBH266")
+    
+    names.remove = c(names.remove, paste0(names.remove, "_w"))
+
+    qwgt.grm.filter = qwgt.grm[,!colnames(qwgt.grm) %in% names.remove]
+    
+    
+    qwgt.grm.filter[is.na(qwgt.grm.filter)] = -9
+    
+    G.qw = Gmatrix(SNPmatrix = t(qwgt.grm.filter),
+                   integer = F)
+    
+    # G.q = Gmatrix(SNPmatrix = t(qwgt.grm.filter[,!grepl("_w", colnames(qwgt.grm.filter))]),
+    #                integer = F)
+
+
+    # #needs a better method of imputation...
+    # #calculate allele freq
+    # 
+    # qwgt.grm.filter[qwgt.grm.filter == -9] = NA
+    # 
+    # af1 = rowSums(qwgt.grm.filter[,grepl("_w", colnames(qwgt.grm.filter))], na.rm = T) /
+    #   ( 2 * ncol(qwgt.grm.filter[,grepl("_w", colnames(qwgt.grm.filter))]) )
+    # 
+    # af2 = rowSums(qwgt.grm.filter, na.rm = T) /
+    #   ( 2 * ncol(qwgt.grm.filter) )
+    # 
+    # # plot(af1, af2)
+    # # lines(c(0,1), c(0,1), col = 'red')
+    # 
+    # af = af1
+    # 
+    # #center by subtracting 2*f
+    # qwgt.grm.c = apply(qwgt.grm.filter, 2, function(x){
+    #   x - (2*af)
+    # })
+    # 
+    # hist(qwgt.grm.c[1,])
+    # head(rowMeans(qwgt.grm.c, na.rm = T))
+    # 
+    # #assume 0 where NA???
+    #   #try imputation??
+    # qwgt.grm.c[is.na(qwgt.grm.c)] = 0
+    # 
+    # #vanraiden scaling parameter
+    # k = 2 * sum(af * (1-af))
+    # 
+    # #G matrix
+    # G.qw = (t(qwgt.grm.c) %*% qwgt.grm.c) / k
+    # 
+    # G.qw = round(G.qw, 4)
+    # 
+    # #heatmap(G.w)
+    # 
+    # #fix symmetry
+    # for(i in 1:dim(G.qw)[1]){
+    #   for(j in 1:i){
+    #     G.qw[j,i] = G.qw[i,j]
+    #   }
+    # }
+    # is.positive.definite(G.qw)
+
+    write.table(G.qw, "24CBHqwGRM.txt", sep = " ",
+                quote = F)
+
+
+#testing and visualizing
+    G.q = G.qw[!grepl("_w", colnames(G.qw)), !grepl("_w", colnames(G.qw))]
+    
+    heatmap(G.q)
+    
+    hist(diag(G.q))
+    #which(diag(G.q) > 1.8)
+    
+    colnames(G.q)[grepl(".x", colnames(G.q))]
+    #065, 193, 221, II96
+    #"23CBH065.x"  "23CBH221.x"  "23CBHII96.x"
+    
+    #well that's not a great sign ...
+    G.q["23CBH065.x", "23CBH065.y"]
+    G.q["23CBH221.x", "23CBH221.y"]
+    
+    #load pedigree
+    ped = read.csv("fullpedigree.csv")
+    
+    testgroup = ped$queen_id[ped$mother%in% c("II13")]
+      testgroup = testgroup[!grepl("p", testgroup)]
+      testgroup = gsub("_", "CBH", testgroup)
+      testgroup = testgroup[testgroup %in% colnames(G.q)]
+      
+      G.test = G.q[testgroup, testgroup]
+      
+      hist(G.test[upper.tri(G.test, diag = F)])
+      hist(G.q[upper.tri(G.q, diag = F)])
+      
+      heatmap(G.test)
+    
   
 #write out...
   
