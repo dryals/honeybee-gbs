@@ -9,7 +9,7 @@ library(AGHmatrix)
 
 #TODO:
   #edit to accept a filename argument or hardcode a filename...
-  #doulbe check 
+  #doulbe check REF and ALT alleles throughout pipelines
 
 setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
@@ -86,6 +86,7 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     allchrs = unique(sync.c)
     
   #use max prob to call queen genotype
+    #TODO: write NA if too few reads!!!
   callQueenPool = function(CHR){
     #just sites within CHR
     samples.depth.chr = samples.depth[sync.c==CHR,]
@@ -97,15 +98,20 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     for(l in 1:nrow(queens.geno.chr)){
       #loop colonies 
       for(c in 1:ncol(queens.geno.chr)){
-        #ref allele freq at site
-        f = frq.chr[l]
-        #probability of each potential queen genotype
-              #prob q is gt  *prob worker obs given q is gt and f
-        pg2 = f**2 *          dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 1)/2)
-        pg1 = 2*(f * (1-f)) * dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 0.5)/2)
-        pg0 = (1-f)**2 *      dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c],  f/2)
-        
-        queens.geno.chr[l,c] = c(2,1,0)[which.max(c(pg2, pg1, pg0))]
+        #return NA if too few observations
+        if(samples.depth.chr[l,c] < 6){
+          queens.geno.chr[l,c] = NA
+        } else{
+          #ref allele freq at site
+          f = frq.chr[l]
+          #probability of each potential queen genotype
+                #prob q is gt  *prob worker obs given q is gt and f
+          pg2 = f**2 *          dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 1)/2)
+          pg1 = 2*(f * (1-f)) * dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c], (f + 0.5)/2)
+          pg0 = (1-f)**2 *      dbinom(samples.ref.chr[l,c], samples.depth.chr[l,c],  f/2)
+          
+          queens.geno.chr[l,c] = c(2,1,0)[which.max(c(pg2, pg1, pg0))]
+        }
       }
     }
     return(cbind(sync[sync.c==CHR,1:2],queens.geno.chr))
@@ -113,14 +119,24 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
   
   registerDoParallel(cores = 16)
   
-  finalqgt = foreach(chr=allchrs, .combine=rbind) %dopar%
+  qgt.out = foreach(chr=allchrs, .combine=rbind) %dopar%
     callQueenPool(chr)
   
-  colnames(finalqgt) = c("chr", "pos", sampnames)
+  colnames(qgt.out) = c("chr", "pos", sampnames)
   
-  sum(finalqgt[,1:2] == sync[,1:2])
+  #how much missing?
+    sum(is.na(qgt.out))
+    qgt.m = qgt.out[,-(1:2)]
+    hist(colSums(is.na(qgt.m)))
+    
+  #remove samps with >20% missing sites
+    keep = colSums(is.na(qgt.m)) < (.2 * nrow(qgt.out))
+    #does this code actualy work?
+    finalqgt = cbind(qgt.out[,1:2],
+                     qgt.m[,keep])
   
   #workers
+    #TODO: remove same samples as with queens...
   workers.geno = round(samples.ref / samples.depth, 4)
   colnames(workers.geno) = paste0(sampnames, "_w")
   
@@ -172,60 +188,64 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
           
     qwgt.grm = qwgt.c[,-(1:2)]
     
-    #try flipping to alt allele??
-    qwgt.grm = 2 - qwgt.grm
     
     #remove missing > 50%
     missing.count = colSums(is.na(qwgt.grm))
-
+    
     sum(missing.count > .5 * nrow(qwgt.grm))
-
+    
     names.remove = names(missing.count)[missing.count > .5 * nrow(qwgt.grm)]
     #add some problematic samples
     names.remove = c(names.remove, "23CBH001", "23CBH246", "23CBH266")
     
     names.remove = c(names.remove, paste0(names.remove, "_w"))
-
+    
     qwgt.grm.filter = qwgt.grm[,!colnames(qwgt.grm) %in% names.remove]
     
+    #folloing vanRaden 2008
     
-    qwgt.grm.filter[is.na(qwgt.grm.filter)] = -9
+    #test queens only
+    qwgt.grm.filter = qwgt.grm.filter[,!grepl("_w", colnames(qwgt.grm.filter))]
     
-    G.qw = Gmatrix(SNPmatrix = t(qwgt.grm.filter),
-                   integer = F)
+    M = (2 - qwgt.grm.filter) -1 # +1 carries two ALT alleles
     
-    # G.q = Gmatrix(SNPmatrix = t(qwgt.grm.filter[,!grepl("_w", colnames(qwgt.grm.filter))]),
-    #                integer = F)
+    M = t(M)
+    
+    #minor alleles in base popn
+    P = read.delim("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-updated.frq",
+                   header = F)
+      #this counts alternate allele
+      colnames(P) = c("chr", "pos", "f")
+      #match to sites 
+      P = P %>% left_join(chrrename) %>% 
+        select(chr = long, pos, f)
+      P = qwgt.c %>% select(chr, pos) %>% 
+        left_join(P)
+      #in case we want MINOR allele freq ... ???
+      #P$f[P$f > 0.5] = 1 - P$f[P$f > 0.5]
+      
+      P.c = 2*(P$f - 0.5)
+      
+      Z = apply(M, 1, function(x){
+        as.numeric(x - P.c)
+      })
+      
+      Z = t(Z)
+      
+      hist(colMeans(Z, na.rm = T))
+      #hist(colMeans(Z, na.rm = T))
+      
+      #impute missing values
+      impute = function(x){
+        x[is.na(x)] = mean(x, na.rm = T)
+        return(x)
+      }
+      
+      Z = apply(Z, 2, impute)
+      
+      G = Z %*% t(Z) /
+        (2 * sum(P$f * (1-P$f)))
 
-
-    # #needs a better method of imputation...
-    # #calculate allele freq
-    # 
-    # qwgt.grm.filter[qwgt.grm.filter == -9] = NA
-    # 
-    # af1 = rowSums(qwgt.grm.filter[,grepl("_w", colnames(qwgt.grm.filter))], na.rm = T) /
-    #   ( 2 * ncol(qwgt.grm.filter[,grepl("_w", colnames(qwgt.grm.filter))]) )
-    # 
-    # af2 = rowSums(qwgt.grm.filter, na.rm = T) /
-    #   ( 2 * ncol(qwgt.grm.filter) )
-    # 
-    # # plot(af1, af2)
-    # # lines(c(0,1), c(0,1), col = 'red')
-    # 
-    # af = af1
-    # 
-    # #center by subtracting 2*f
-    # qwgt.grm.c = apply(qwgt.grm.filter, 2, function(x){
-    #   x - (2*af)
-    # })
-    # 
-    # hist(qwgt.grm.c[1,])
-    # head(rowMeans(qwgt.grm.c, na.rm = T))
-    # 
-    # #assume 0 where NA???
-    #   #try imputation??
-    # qwgt.grm.c[is.na(qwgt.grm.c)] = 0
-    # 
     # #vanraiden scaling parameter
     # k = 2 * sum(af * (1-af))
     # 
@@ -249,7 +269,10 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
 
 
 #testing and visualizing
-    G.q = G.qw[!grepl("_w", colnames(G.qw)), !grepl("_w", colnames(G.qw))]
+    #G.q = G.qw[!grepl("_w", colnames(G.qw)), !grepl("_w", colnames(G.qw))]
+    
+    G.q = G
+    
     
     heatmap(G.q)
     
@@ -263,11 +286,12 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     #well that's not a great sign ...
     G.q["23CBH065.x", "23CBH065.y"]
     G.q["23CBH221.x", "23CBH221.y"]
+    #G.q["23CBHII96.x", "23CBHII96.y"]
     
     #load pedigree
     ped = read.csv("fullpedigree.csv")
     
-    testgroup = ped$queen_id[ped$mother%in% c("II13")]
+    testgroup = ped$queen_id[ped$mother%in% c("II73")]
       testgroup = testgroup[!grepl("p", testgroup)]
       testgroup = gsub("_", "CBH", testgroup)
       testgroup = testgroup[testgroup %in% colnames(G.q)]
@@ -275,7 +299,10 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
       G.test = G.q[testgroup, testgroup]
       
       hist(G.test[upper.tri(G.test, diag = F)])
+      mean(G.test[upper.tri(G.test, diag = F)])
+      
       hist(G.q[upper.tri(G.q, diag = F)])
+      mean(G.q[upper.tri(G.q, diag = F)])
       
       heatmap(G.test)
     

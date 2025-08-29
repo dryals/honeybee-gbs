@@ -60,3 +60,15 @@ Raw reads were then aligned to the honeybee reference genome Amel HAV3.1, Geneba
 
 consider ld pruning total sites, this might get better relatedness estimates? 
     or use KING or something?
+    
+double check allele frequencies ... calculate each year individually or jointly?
+    use same values or different when calc GRM?
+    
+### 8/29/25
+
+GRM issues, still need resolved. Queen GTs mostly okay, need to resolve workers
+
+consider easier filtering on mpileup, sync , get more reads through?
+
+check filtering steps on 2023 data, make sure it's high quality as well ... 
+    particularly calculating allele freqs
