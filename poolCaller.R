@@ -136,9 +136,13 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
                      qgt.m[,keep])
   
   #workers
-    #TODO: remove same samples as with queens...
-  workers.geno = round(samples.ref / samples.depth, 4)
-  colnames(workers.geno) = paste0(sampnames, "_w")
+    workers.geno = round(2 * samples.ref / samples.depth, 4)
+    colnames(workers.geno) = paste0(sampnames, "_w")
+    #remove same samples as with queens...
+    workers.geno = workers.geno[,keep]
+  
+    dim(finalqgt)
+    dim(workers.geno)
   
   #combine workers and queens, rename with _w...
   qwgt24 = cbind(finalqgt, workers.geno)
@@ -149,6 +153,9 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     #read in 2023 genotypes
   qwgt23 = read.delim("../../23CBH/analysis/23CBH_qw_ref.geno", sep = " ")
     colnames(qwgt23) = gsub("X", "", colnames(qwgt23))
+    
+    #verify worker genotypes are float
+    hist(as.matrix(qwgt23[,grepl("_w", colnames(qwgt23))]))
     
     #ensure both years use REF or ALT
       #ensure sites are identical
@@ -202,10 +209,15 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     
     qwgt.grm.filter = qwgt.grm[,!colnames(qwgt.grm) %in% names.remove]
     
+    #verify worker genotypes are float
+    hist(as.matrix(qwgt.grm.filter[,grepl("_w", colnames(qwgt.grm.filter))]))
+    hist(as.matrix(qwgt.grm.filter[,grepl("^23.*_w", colnames(qwgt.grm.filter))]))
+    hist(as.matrix(qwgt.grm.filter[,grepl("^24.*_w", colnames(qwgt.grm.filter))]))
+    
     #folloing vanRaden 2008
     
     #test queens only
-    qwgt.grm.filter = qwgt.grm.filter[,!grepl("_w", colnames(qwgt.grm.filter))]
+    #qwgt.grm.filter = qwgt.grm.filter[,!grepl("_w", colnames(qwgt.grm.filter))]
     
     M = (2 - qwgt.grm.filter) -1 # +1 carries two ALT alleles
     
@@ -226,10 +238,12 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
       
       P.c = 2*(P$f - 0.5)
       
+      #for each individual, adjust genotypes by frequencies
       Z = apply(M, 1, function(x){
         as.numeric(x - P.c)
       })
       
+      #transpose 
       Z = t(Z)
       
       hist(colMeans(Z, na.rm = T))
@@ -264,15 +278,16 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     # }
     # is.positive.definite(G.qw)
 
-    write.table(G.qw, "24CBHqwGRM.txt", sep = " ",
+    write.table(G, "24CBHqwGRM.txt", sep = " ",
                 quote = F)
 
 
 #testing and visualizing
-    #G.q = G.qw[!grepl("_w", colnames(G.qw)), !grepl("_w", colnames(G.qw))]
+    hist(diag(G))
+    hist(diag(G)[grepl("_w", colnames(G))])
+    hist(diag(G)[!grepl("_w", colnames(G))])
     
-    G.q = G
-    
+    G.q = G[!grepl("_w", colnames(G)), !grepl("_w", colnames(G))]
     
     heatmap(G.q)
     
@@ -291,7 +306,7 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     #load pedigree
     ped = read.csv("fullpedigree.csv")
     
-    testgroup = ped$queen_id[ped$mother%in% c("II73")]
+    testgroup = ped$queen_id[ped$mother%in% c("23_065")]
       testgroup = testgroup[!grepl("p", testgroup)]
       testgroup = gsub("_", "CBH", testgroup)
       testgroup = testgroup[testgroup %in% colnames(G.q)]
