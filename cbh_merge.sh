@@ -23,27 +23,27 @@ conda activate ipyrad
 
 echo "-------------"
 
-# echo "merging plates..."
-#     #gather completed files
-#     cd $CLUSTER_SCRATCH/gbs/23CBH
-#         mkdir -p varcall-update
-#         cd varcall-update
-#         
-#         #create var with all plate names
-#         ls ../*/*.json
-#         #...
-#         echo -n "" > mergep.txt
-#         for i in {1..31}
-#         do
-#             echo -n "../23CBH_${i}/params-23CBH_${i}.txt " >> mergep.txt
-#         done 
-#             echo "" >> mergep.txt
-#             
-#             
-#         mp=$( cat mergep.txt )
-#         
-#     #create merged param file
-#     ipyrad -m varcall-update $mp
+echo "merging plates..."
+    #gather completed files
+    cd $CLUSTER_SCRATCH/gbs/23CBH
+        mkdir -p varcall-update
+        cd varcall-update
+        
+        #create var with all plate names
+        ls ../*/*.json
+        #...
+        echo -n "" > mergep.txt
+        for i in {1..31}
+        do
+            echo -n "../23CBH_${i}/params-23CBH_${i}.txt " >> mergep.txt
+        done 
+            echo "" >> mergep.txt
+            
+            
+        mp=$( cat mergep.txt )
+        
+    #create merged param file
+    ipyrad -m varcall-update $mp
 #     
 #     #edit if needed...
 #      

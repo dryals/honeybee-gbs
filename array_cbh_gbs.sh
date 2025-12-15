@@ -31,7 +31,16 @@ conda activate ipyrad
 # 
 # 
 # #output logfile to track all jobs at once
+
+
  log=/home/dryals/ryals/honeybee-gbs/outputs/array.out
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
 #     echo -n "" > $log
 #     date > $log
