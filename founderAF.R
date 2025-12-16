@@ -4,9 +4,9 @@
   setwd("/home/dylan/Documents/bees/harpurlab/project/honeybee-gbs")
   #setwd("~/ryals/honeybee-gbs")
   library(tidyverse)
-  #library(Matrix)
+  library(Matrix)
   library(readxl)
-  library(vcfR)
+  #library(vcfR)
 
 
 
@@ -209,9 +209,10 @@
      filter(!id %in% RMnames,
             !X.FID %in% suspect)
    
-   write.table(goodworkers %>% select(X.FID, id), 
+   write.table(goodworkers %>% select(id), 
                file = "data/goodworkers.txt",
-               col.names = F, row.names = F)
+               col.names = F, row.names = F,
+               quote = F)
    
 #prepare pedigree
    #ensure ids sare same

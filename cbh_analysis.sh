@@ -153,15 +153,9 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         pip install Cython=0.29.1
 #         pip install AlphaPlinkPython
 
-#locally...
+        conda activate AlphaPeel
+        
 
-        
-        cd /scratch/negishi/dryals/gbs/23CBH/analysis/ap
-        
-        AlphaPeel -pedigree APped.txt -bfile ../23CBH \
-            -out ap
-    
-    
 
 # #predict queen and average worker genotypes
     #see R script...
