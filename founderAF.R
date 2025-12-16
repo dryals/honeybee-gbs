@@ -271,5 +271,34 @@
                file = "data/APped.txt", row.names = F, col.names = F)
    
 
+
    
+   
+#write genotype file
+   #read in allele frequencies ...
+   af.raw = read.delim("23CBH-updated.frq", header = F) 
+   colnames(af.raw) = c("chr", "pos", "f")
+   #af = af %>% filter(chr == chrno)
+   
+   #remove zeros
+   sum(af.raw$f == 0)
+   
+   af = af.raw[af.raw$f != 0,]
+   
+   
+   #read in genotypes
+   #vcf.raw = read.vcfR(paste0("chrs/chr",chrno,"/23CBH-filter-", chrno, ".vcf"))
+   vcf.raw = read.vcfR("23CBH-updated-filter.vcf")
+   
+   
+   #convert to dosage
+   gt = extract.gt(vcf.raw)
+   
+   gt2 = gt
+   gt2[gt == "0/0"] = "0"
+   gt2[gt2 == "1/1"] = "2"
+   gt2[gt2 == "1/0" | gt2 == "0/1"] = "1"
+   gt2 = as.data.frame(gt2)
+   
+   rm(gt, vcf.raw)
    

@@ -67,12 +67,18 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #             --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
 #             
 #         bcftools index -c 23CBH-updated-filter.bcf.gz
+        cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
         
         bcftools view 23CBH-updated.bcf.gz -M2 -m2 -e 'F_MISSING>0.10' \
             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
             --threads $SLURM_NTASKS -Ob -o 23CBH-updated-geno.bcf.gz 
             
         bcftools index -c 23CBH-updated-geno.bcf.gz
+        
+        bcftools view 23CBH-updated-geno.bcf.gz -q 0.001:minor \
+            --threads $SLURM_NTASKS -Oz -o 23CBH-ap.vcf.gz 
+            
+        bcftools index -c 23CBH-ap.vcf.gz
         
 #         
 #         #how many sites?
@@ -126,15 +132,24 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
 #...using alpha peel!
     #conda environment
-        module purge
-        module load anaconda
-        conda create -n AlphaPeel
-        conda activate AlphaPeel
-        conda install pip
-        pip install AlphaPeel
+#         module purge
+#         module load anaconda
+#         
+#         conda create -n AlphaPeel
+#         conda activate AlphaPeel
+#         conda install pip pip setuptools wheel
+#         pip install AlphaPeel
+#         pip install cgi
+#         pip install Cython=0.29.1
+#         pip install AlphaPlinkPython
+
+#locally...
+
         
         cd /scratch/negishi/dryals/gbs/23CBH/analysis/ap
         
+        AlphaPeel -pedigree APped.txt -bfile ../23CBH \
+            -out ap
     
     
 
