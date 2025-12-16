@@ -80,6 +80,8 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
             
         bcftools index -c 23CBH-ap.vcf.gz
         
+        #TODO: remove bad inds!!!!!!@!!!!!!!!!!!!
+        
 #         
 #         #how many sites?
 #         bcftools view 23CBH-updated-filter.bcf.gz | grep -v "#" | wc -l
@@ -115,7 +117,15 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 
     plink2 --bfile 23CBH --make-king square --out 23CBH
 
-    module purge
+    #module purge
+    
+    awk -v OFS='_' '{print $1, $2}' 23CBH.fam > keep.samps
+    
+    cd ..
+    
+    bcftools view 23CBH-updated-geno.bcf.gz -q 0.005:minor \
+            -S plink/keep.samps \
+            --threads $SLURM_NTASKS -Ov -o 23CBH-ap.vcf 
 
 
 
