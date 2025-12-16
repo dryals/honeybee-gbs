@@ -59,14 +59,21 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         bcftools merge split1.bcf.gz split2.bcf.gz -0 --threads $SLURM_NTASKS -Ob -o 23CBH-updated.bcf.gz
 #         bcftools index -c 23CBH-updated.bcf.gz
 #         
-#     echo "filtering input..."
-#     #filter the input
-#         #remove missing, keep all alleles
+    echo "filtering input..."
+    #filter the input
+        #remove missing, keep all alleles
 #         bcftools view 23CBH-updated.bcf.gz -M2 -q 0.01:minor -e 'F_MISSING>0.10' \
 #             -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
 #             --threads $SLURM_NTASKS -Ob -o 23CBH-updated-filter.bcf.gz 
-# #             
+#             
 #         bcftools index -c 23CBH-updated-filter.bcf.gz
+        
+        bcftools view 23CBH-updated.bcf.gz -M2 -m2 -e 'F_MISSING>0.10' \
+            -r 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 \
+            --threads $SLURM_NTASKS -Ob -o 23CBH-updated-geno.bcf.gz 
+            
+        bcftools index -c 23CBH-updated-geno.bcf.gz
+        
 #         
 #         #how many sites?
 #         bcftools view 23CBH-updated-filter.bcf.gz | grep -v "#" | wc -l
@@ -84,9 +91,28 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         
 #         #pull sample names
 #         grep "#CHROM" -m 1 23CBH-updated-filter.vcf > header.txt
-# 
-#         
-#         
+#
+
+#KING relatedness
+    cd $CLUSTER_SCRATCH/gbs/23CBH/analysis/plink
+    
+    module load biocontainers plink
+    
+    plink --bcf ../23CBH-updated-geno.bcf.gz --make-bed \
+        --geno 0.1 --mind 0.4 --maf 0.005 \
+        --allow-extra-chr --chr-set 16 no-xy -chr $chrsShort \
+        --set-missing-var-ids @:# \
+        --out 23CBH
+        
+    module purge
+    module load biocontainers plink2
+
+    plink2 --bfile 23CBH --make-king square --out 23CBH
+
+    module purge
+
+
+
 #     echo "calculataing allele freqs..."
 #     # see R script ... 
 #     bcftools view 23CBH-updated-filter.bcf.gz -S ~/ryals/honeybee-gbs/data/balanceSet.txt -Ou | \
@@ -96,6 +122,20 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #             
 #     bcftools view 23CBH-balanced.bcf.gz -Ou | bcftools +fill-tags -Ou | \
 #         bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH-updated.frq
+
+
+#...using alpha peel!
+    #conda environment
+        module purge
+        module load anaconda
+        conda create -n AlphaPeel
+        conda activate AlphaPeel
+        conda install pip
+        pip install AlphaPeel
+        
+        cd /scratch/negishi/dryals/gbs/23CBH/analysis/ap
+        
+    
     
 
 # #predict queen and average worker genotypes
