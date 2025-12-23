@@ -336,10 +336,10 @@
                quote = F)
    
    
-#write genotype file
+   #write genotype file
    #read in allele frequencies ...
    setwd("/scratch/negishi/dryals/gbs/23CBH/analysis")
-  
+   
    #read in genotypes
    vcf.raw = read.vcfR("23CBH-ap.vcf")
    
@@ -355,15 +355,16 @@
    
    rm(gt, vcf.raw)
    
-  #write it
+   #write it
    gt.out = cbind(colnames(gt2), t(gt2))
    gt.out[is.na(gt.out)] = 9
    gt.out[1:10,1:10]
    
    write.table(gt.out,
-               file = "ap/ap.geno",
+               file = "ap/APgeno.txt",
                col.names = F,
                row.names = F,
                quote = F)
+   
    
    
