@@ -276,6 +276,65 @@
 
 
    
+#subset to help computation
+   ped = read.delim("data/APped.txt", header = F, sep = "")
+    colnames(ped) = c("queen_id", "father", "mother")
+   
+   goodwrk = read.delim("data/goodworkers.txt", header = F, sep = "")
+    colnames(goodwrk) = "queen_id"
+   #goodwrk$queen_id = gsub("_","",goodwrk$worker_id)
+   
+   goodwrk = goodwrk %>% left_join(ped) %>% 
+     left_join(ped %>% select(mother = queen_id, grandmother = mother))
+   
+   #select a balanced set of workers from each grandmother!
+   table(
+     goodwrk %>%
+       filter(!grepl("_p", grandmother)) %>%
+       group_by(mother) %>% slice(1) %>% 
+       ungroup() %>% 
+     select(grandmother)
+     )
+   
+   balanced = goodwrk %>%
+     filter(!grepl("359a", queen_id)) %>% 
+     filter(!grepl("_p", grandmother)) %>%
+     group_by(mother) %>% slice(1) %>% 
+     ungroup() %>% 
+     group_by(grandmother) %>% 
+     slice_sample(n = 5) %>% 
+     select(mother)
+   
+   table(balanced$grandmother)
+   
+   balwrk = goodwrk %>% filter(mother %in% balanced$mother)
+   
+   newped = ped %>% 
+     filter(!grepl("23CBH[0-9]", queen_id),
+            !grepl("_[0-9]", queen_id))
+   
+   
+   add = unique(balwrk$mother)[!unique(balwrk$mother) %in% newped$queen_id]
+   
+   newped = rbind(newped, ped[ped$queen_id %in% add,])
+   
+   newped = rbind(newped, balwrk %>% select(queen_id, father, mother))
+   
+   #check complete
+   
+   unique(newped$mother)[!unique(newped$mother) %in% newped$queen_id]
+   unique(newped$father)[!unique(newped$father) %in% newped$queen_id]
+   
+#new write
+   write.table(newped,
+               file = "data/APped-reduced.txt", row.names = F, col.names = F,
+               quote = F)
+   
+   #new write
+   write.table(balwrk %>% select(queen_id),
+               file = "data/workers-reduced.txt", row.names = F, col.names = F,
+               quote = F)
+   
    
 #write genotype file
    #read in allele frequencies ...

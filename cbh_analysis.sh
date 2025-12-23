@@ -123,8 +123,8 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     
     cd ..
     
-    bcftools view 23CBH-updated-geno.bcf.gz -q 0.005:minor \
-            -S plink/keep.samps \
+    bcftools view 23CBH-updated-geno.bcf.gz -q 0.01:minor \
+            -S ap/goodworkers.txt \
             --threads $SLURM_NTASKS -Ov -o 23CBH-ap.vcf 
 
 
@@ -152,8 +152,14 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         pip install cgi
 #         pip install Cython=0.29.1
 #         pip install AlphaPlinkPython
-
+        
+        module load anaconda
+        cd $CLUSTER_SCRATCH/gbs/23CBH/analysis/ap
         conda activate AlphaPeel
+        
+        AlphaPeel -genotypes APgeno.txt -pedigree APped.txt \
+            -out ap2
+            
         
 
 
