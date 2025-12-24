@@ -80,7 +80,7 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
             
         bcftools index -c 23CBH-ap.vcf.gz
         
-        #TODO: remove bad inds!!!!!!@!!!!!!!!!!!!
+        #TODO: remove bad inds!!!!!!!!!!!!!!!!!!
         
 #         
 #         #how many sites?
@@ -126,6 +126,57 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     bcftools view 23CBH-updated-geno.bcf.gz -q 0.01:minor \
             -S ap/goodworkers.txt \
             --threads $SLURM_NTASKS -Ov -o 23CBH-ap.vcf 
+            
+    #output site list for ap
+    grep -v "#" 23CBH-ap.vcf | awk '{print $1, $2}' > 23CBH-ap.sites
+    
+    #find total map lengths
+    cp /depot/bharpur/data/ref_genomes/AMEL/resources/recombination/AMELMarley.renamed.fixed.txt \
+        ./marey.txt
+        
+        cat marey.txt | tr "\"" " " > marey2.txt
+        
+#         #done in R bacause awk is a pain
+#         R
+#         #print length of ea chrs
+#         marey = read.delim("marey2.txt", header = T, sep = "\t")
+#         library(dplyr)
+#         chr.big = marey %>% group_by(map) %>% arrange(desc(gen)) %>% slice(1) %>% select(map, gen) %>% 
+#             mutate(gen = gen / 100)
+#         write.table(file="chrlength.txt", chr.big, quote = F, col.names = F, row.names = F)
+#         #print start and stop indicies
+#         sites = read.delim("23CBH-ap.sites", header = F, sep = "")
+#         
+#         chridx = data.frame(chr = unique(sites$V1),
+#                             start = NA,
+#                             stop = NA
+#                             )
+#         chridx$start[1] = 1
+#         chridx$stop[1] = which.max( sites$V2[sites$V1 == 1] )
+#         for( i in 2:16){
+#         
+#         chridx$start[i] = chridx$stop[(i-1)] + 1
+#         chridx$stop[i] = chridx$stop[(i-1)] + which.max( sites$V2[sites$V1 == i] )
+#         
+#         }
+#         write.table(chridx, file = "chridx.txt", col.names = F, row.names = F, quote = F)
+#         #write out map files
+#         for (i in 1:16){
+#             sites.tmp = sites %>% filter(V1 == i)
+#                 colnames(sites.tmp) = c("chr","bp")
+#                 sites.tmp$name = paste0("snp", 1:nrow(sites.tmp))
+#                 
+#             write.table(sites.tmp %>% select(chr, name, bp), 
+#                 file = paste0("ap/chr", i, "/map.txt"),
+#                 row.names = F, col.names = F, quote = F
+#             )
+#         }
+#         
+#         quit(save = "no")
+        
+
+        
+
 
 
 
@@ -152,14 +203,91 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
 #         pip install cgi
 #         pip install Cython=0.29.1
 #         pip install AlphaPlinkPython
+
+#download devel branch 
+    cd ~/ryals
+    git clone --recurse-submodules -b devel https://github.com/AlphaGenes/AlphaPeel.git
+    cd AlphaPeel
+    conda create -n alphaPeel3
+    conda activate alphaPeel3
+    conda install pip
+    python3 -m pip install --upgrade build
+    python3 -m build
+    python3 -m pip install dist/alphapeel*.whl
+    
+    
+    
         
         module load anaconda
         cd $CLUSTER_SCRATCH/gbs/23CBH/analysis/ap
-        conda activate AlphaPeel
+        conda activate alphaPeel3
         
-        AlphaPeel -genotypes APgeno.txt -pedigree APped.txt \
-            -out ap2
+        #TODO
+            #reach out to Jana for help!
+            #use Purdue metafounder
+            #include suspect colonies as unplaced indiv
+            #does AP generate good parental genotypes? use instead of queencaller
+            #hybrid peeling? phasing?
+                #input a map file?
+                #use phasing information for queen caller????
+            #use imputation? run from raw seq data?
+        
+
+         #loop through chrs ... would be better in an array job
+
+         for chr in {1..16}
+         do
+            #take chr parameters
+            start=$( sed "${chr}q;d" ../chridx.txt | awk '{print $2}')
+            stop=$( sed "${chr}q;d" ../chridx.txt | awk '{print $3}' )
+            len=$( sed "${chr}q;d" ../chrlength.txt | awk '{print $2}' )
             
+            echo "$chr : $start , $stop , $len"
+            
+            mkdir -p chr${chr}
+            
+            #run ap for chr
+            AlphaPeel -geno_file APgeno-reduced.txt \
+                -method multi \
+                -ped_file APped-reduced.txt \
+                -out_file chr${chr}/ap \
+                -rec_length $len -start_snp $start -stop_snp $stop \
+                -n_cycle 8 \
+                -n_thread $SLURM_NTASKS \
+                -n_io_thread 8 \
+                -no_dosage \
+                -est_alt_allele_prob \
+                -update_alt_allele_prob \
+                -alt_allele_prob \
+                -geno_threshold 0.34 -geno \
+                -map_file chr${chr}/map.txt
+
+         done
+         
+    #combine AF and GT into dingle files
+        #AF
+        tail -n +2 chr1/ap.alt_allele_prob.txt > all_founderAF2.txt
+        #GT
+        cat chr1/ap.geno_0.34.txt > all_GT.txt
+        for chr in {2..16}
+        do
+            #AF
+            tail -n +2 chr${chr}/ap.alt_allele_prob.txt >> all_founderAF2.txt
+            #GT
+            paste all_GT.txt \
+            <( awk '{OFS=" "; $1=""; gsub(/[[:space:]]+/, " "); print $0}' chr${chr}/ap.geno_0.34.txt ) > tmp
+            cat tmp > all_GT.txt
+        done
+        
+
+        
+        
+        #compare against naive afs
+        cd ..
+    bcftools view 23CBH-ap.vcf | bcftools +fill-tags | \
+        bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH-ap.frq
+        
+        
         
 
 
