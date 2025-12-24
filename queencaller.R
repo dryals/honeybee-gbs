@@ -1,4 +1,8 @@
 #for parallel processing
+#Dylan Ryals
+
+#last update: 24DEC25: using AP allele frequencies 
+
 # args = commandArgs(trailingOnly=TRUE)
 # chrno = args[1]
 
@@ -13,30 +17,40 @@ select = dplyr::select
 setwd("/scratch/negishi/dryals/gbs/23CBH/analysis")
 
 #read in sample info
-samples = read.delim("header.txt", header = F) %>% t() %>% 
-  as.data.frame() %>% 
-  rename(sample_id = 1) %>% 
-  filter(grepl("23CBH", sample_id)) %>% 
-  mutate(queen_id = gsub("_[0-9]*", "", sample_id),
-         colony_id = gsub("23CBH", "", queen_id)) 
+# samples = read.delim("header.txt", header = F) %>% t() %>% 
+#   as.data.frame() %>% 
+#   rename(sample_id = 1) %>% 
+#   filter(grepl("23CBH", sample_id)) %>% 
+#   mutate(queen_id = gsub("_[0-9]*", "", sample_id),
+#          colony_id = gsub("23CBH", "", queen_id)) 
+
+samples = read.delim("plink/23CBH.fam", header = F, sep = "")[,1:2] %>% 
+  mutate(worker_id = paste0(V1, "_", V2)) %>% 
+  select(worker_id, queen_id = V1)
 
   # samples %>% group_by(colony_id) %>% summarise(n = n()) %>% 
   # filter(n < 7) %>%  ungroup %>% arrange(n) 
 
 #read in allele frequencies ...
-af.raw = read.delim("23CBH-updated.frq", header = F) 
+af.raw = cbind(
+                read.delim("23CBH-ap.sites", header = F, sep = ""),
+                read.delim("ap/all_founderAF2.txt", header = F)
+              )
+  
   colnames(af.raw) = c("chr", "pos", "f")
+  af = af.raw
   #af = af %>% filter(chr == chrno)
   
-  #remove zeros
-  sum(af.raw$f == 0)
-  
-  af = af.raw[af.raw$f != 0,]
+  # #remove zeros
+  # sum(af.raw$f == 0)
+  # 
+  # af = af.raw[af.raw$f != 0,]
 
 
   #read in genotypes
   #vcf.raw = read.vcfR(paste0("chrs/chr",chrno,"/23CBH-filter-", chrno, ".vcf"))
-  vcf.raw = read.vcfR("23CBH-updated-filter.vcf")
+  #same sites as AP but with all the individuals 
+  vcf.raw = read.vcfR("23CBH-queencaller.vcf")
   
   
   #convert to dosage
@@ -50,9 +64,9 @@ af.raw = read.delim("23CBH-updated.frq", header = F)
   
   rm(gt, vcf.raw)
   
-  #remove zeros
-    gt2 = gt2[af.raw$f != 0,]
-  
+  # #remove zeros
+  #   gt2 = gt2[af.raw$f != 0,]
+  # 
   
   
 #randomly sample for testing
@@ -153,6 +167,8 @@ callqueen = function(CHR){
     finalqgt = foreach(chr=1:16, .combine=rbind) %dopar%
       callqueen(chr)
     
+    #save(finalqgt, file = "qgt.Rdata")
+    
     
 #workers
     #create data matrix
@@ -195,7 +211,7 @@ callqueen = function(CHR){
     gencomb = cbind(af$chr, af$pos, qwgt.out)
       names(gencomb)[1:2] = c("chr", "pos")
     
-    write.table(gencomb, file = "23CBH_qw_ref.geno",
+    write.table(gencomb, file = "23CBH_qwRefAP.geno",
                 sep = " ", col.names = T, quote = F, row.names = F)
     
     
