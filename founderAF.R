@@ -2,7 +2,7 @@
 
 #load libraries
   setwd("/home/dylan/Documents/bees/harpurlab/project/honeybee-gbs")
-  #setwd("~/ryals/honeybee-gbs")
+  #setwd("/scratch/negishi/dryals/gbs/23CBH/analysis/ap")
   library(tidyverse)
   library(Matrix)
   library(readxl)
@@ -336,12 +336,16 @@
                quote = F)
    
    
+   
+#read those files
+   wrks = read.delim("workers-reduced.txt", header = F, sep = "")
+   
    #write genotype file
    #read in allele frequencies ...
-   setwd("/scratch/negishi/dryals/gbs/23CBH/analysis")
+   setwd("/scratch/negishi/dryals/gbs/23CBH/analysis/ap")
    
    #read in genotypes
-   vcf.raw = read.vcfR("23CBH-ap.vcf")
+   vcf.raw = read.vcfR("../23CBH-ap.vcf")
    
    
    #convert to dosage
@@ -355,13 +359,16 @@
    
    rm(gt, vcf.raw)
    
+   #filter to desired individuals
+   gt3 = gt2[,wrks$V1]
+   
    #write it
-   gt.out = cbind(colnames(gt2), t(gt2))
+   gt.out = cbind(colnames(gt3), t(gt3))
    gt.out[is.na(gt.out)] = 9
    gt.out[1:10,1:10]
    
    write.table(gt.out,
-               file = "ap/APgeno.txt",
+               file = "APgeno-reduced.txt",
                col.names = F,
                row.names = F,
                quote = F)
