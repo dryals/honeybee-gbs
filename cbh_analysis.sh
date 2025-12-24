@@ -130,6 +130,14 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
     #output site list for ap
     grep -v "#" 23CBH-ap.vcf | awk '{print $1, $2}' > 23CBH-ap.sites
     
+    cat 23CBH-ap.sites | tr " " "\t" > 23CBH-ap-tr.sites
+    
+    #output full sample list for queencaller
+    bcftools view 23CBH-updated-geno.bcf.gz \
+        -T 23CBH-ap-tr.sites \
+        --threads $SLURM_NTASKS -Ov -o 23CBH-queencaller.vcf
+    
+    
     #find total map lengths
     cp /depot/bharpur/data/ref_genomes/AMEL/resources/recombination/AMELMarley.renamed.fixed.txt \
         ./marey.txt
