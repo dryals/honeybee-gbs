@@ -42,15 +42,15 @@ module load biocontainers samtools
     mkdir -p chrPar/chr${chrShort}
     cd chrPar/chr${chrShort}
     
-    grep $chrLong ../../23CBH-t.sites > 23CBH_chr${chrShort}.sites
+    grep $chrLong ../../23CBH-ap-t.sites > 23CBH-ap_chr${chrShort}.sites
     
     echo "starting chr $chrShort" >> $log
     
     samtools mpileup -b ../../24CBHpool.bamlist \
     -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
-    -l 23CBH_chr${chrShort}.sites \
+    -l 23CBH-ap_chr${chrShort}.sites \
     -C 50 -q 20 -Q 20 -d 200 \
-    -a -o 24CBH_chr${chrShort}.mpileup
+    -a -o 24CBH-ap_chr${chrShort}.mpileup
     
     echo "FINISHED chr $chrShort" >> $log
     

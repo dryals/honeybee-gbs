@@ -40,19 +40,22 @@ module load biocontainers samtools bcftools
 # #testing on a single plate with all sites identified in 2023
 #     awk '{print $1, $2}' /scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-updated.frq > 23CBH.sites
 #     
-#     #translate numeric chr to codes (annoying)
-#         awk '{print $2, $1}' ~/ryals/admixPipeline/chrsrename.txt  > chrsrename.txt
-#         awk '{print $1}' 23CBH.sites > tmp.1
-#         
-#         awk '
-#             NR==FNR { map[$1] = $2; next }
-#             $0 in map { $0 = map[$0] }
-#             { print }
-#             ' chrsrename.txt tmp.1 > tmp.2
-#         
-#         awk '{print $2}' 23CBH.sites > tmp.3
-#         paste tmp.2 tmp.3 > 23CBH-t.sites
-#         rm tmp.*
+    #translate numeric chr to codes (annoying)
+    cd $CLUSTER_SCRATCH/gbs/23CBH/analysis
+        awk '{print $2, $1}' ~/ryals/admixPipeline/chrsrename.txt  > chrsrename.txt
+        awk '{print $1}' 23CBH-ap.sites > tmp.1
+        
+        awk '
+            NR==FNR { map[$1] = $2; next }
+            $0 in map { $0 = map[$0] }
+            { print }
+            ' chrsrename.txt tmp.1 > tmp.2
+        
+        awk '{print $2}' 23CBH-ap.sites > tmp.3
+        paste tmp.2 tmp.3 > 23CBH-ap-t.sites
+        rm tmp.*
+        
+        cp 23CBH-ap-t.sites ../../24CBH/analysis
 #     
 #     #try on 4 samples and time
 #     date
