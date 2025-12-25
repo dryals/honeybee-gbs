@@ -47,7 +47,7 @@ module load biocontainers samtools
     echo "starting chr $chrShort" >> $log
     
     samtools mpileup -b ../../24CBHpool.bamlist \
-    -f /depot/bharpur/data/ref_genomes/AMEL/Amel_HAv3.1_genomic.fna \
+    -f /depot/bharpur/data/ref_genomes/AMEL/ipyrad/GCF_003254395.2_Amel_HAv3.1_genomic.fna \
     -l 23CBH-ap_chr${chrShort}.sites \
     -C 50 -q 20 -Q 20 -d 200 \
     -a -o 24CBH-ap_chr${chrShort}.mpileup
