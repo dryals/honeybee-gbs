@@ -84,7 +84,9 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
 # 
 #     frq = rowSums(samples.ref) / rowSums(samples.depth)
     
-  frq = read.delim()
+  frq = read.delim("/scratch/negishi/dryals/gbs/23CBH/analysis/ap/all_founderAF2.txt",
+                   header = F, sep = " ")
+    frq = frq$V1
     
     allchrs = unique(sync.c)
     
@@ -150,12 +152,14 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
   #combine workers and queens, rename with _w...
   qwgt24 = cbind(finalqgt, workers.geno)
   
+  save(qwgt24, file = "qwgt24.Rdata")
+  
   
 #combine with 2023 genotypes .... 
   
     #read in 2023 genotypes
-  qwgt23 = read.delim("../../23CBH/analysis/23CBH_qw_ref.geno", sep = " ")
-    colnames(qwgt23) = gsub("X", "", colnames(qwgt23))
+  qwgt23 = read.delim("../../23CBH/analysis/23CBH_qwRefAP.geno", sep = " ")
+    colnames(qwgt23) = gsub("^X", "", colnames(qwgt23))
     
     #verify worker genotypes are float
     hist(as.matrix(qwgt23[,grepl("_w", colnames(qwgt23))]))
@@ -206,7 +210,8 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     
     names.remove = names(missing.count)[missing.count > .5 * nrow(qwgt.grm)]
     #add some problematic samples
-    names.remove = c(names.remove, "23CBH001", "23CBH246", "23CBH266")
+    #names.remove = c(names.remove, "23CBH001", "23CBH246", "23CBH266")
+    names.remove = c(names.remove, "23CBH001")
     
     names.remove = c(names.remove, paste0(names.remove, "_w"))
     
@@ -226,20 +231,17 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     
     M = t(M)
     
-    #minor alleles in base popn
-    P = read.delim("/scratch/negishi/dryals/gbs/23CBH/analysis/23CBH-updated.frq",
-                   header = F)
-      #this counts alternate allele
-      colnames(P) = c("chr", "pos", "f")
-      #match to sites 
-      P = P %>% left_join(chrrename) %>% 
-        select(chr = long, pos, f)
-      P = qwgt.c %>% select(chr, pos) %>% 
-        left_join(P)
+    #alt allele freq in base popn:
+    hist(frq)
+    
+    length(frq)
+    dim(M)
+      
       #in case we want MINOR allele freq ... ???
       #P$f[P$f > 0.5] = 1 - P$f[P$f > 0.5]
       
-      P.c = 2*(P$f - 0.5)
+      #why this again?
+      P.c = 2*(frq - 0.5)
       
       #for each individual, adjust genotypes by frequencies
       Z = apply(M, 1, function(x){
@@ -250,7 +252,6 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
       Z = t(Z)
       
       hist(colMeans(Z, na.rm = T))
-      #hist(colMeans(Z, na.rm = T))
       
       #impute missing values
       impute = function(x){
@@ -261,7 +262,7 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
       Z = apply(Z, 2, impute)
       
       G = Z %*% t(Z) /
-        (2 * sum(P$f * (1-P$f)))
+        (2 * sum(frq * (1-frq)))
 
     # #vanraiden scaling parameter
     # k = 2 * sum(af * (1-af))
@@ -269,19 +270,24 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     # #G matrix
     # G.qw = (t(qwgt.grm.c) %*% qwgt.grm.c) / k
     # 
-    # G.qw = round(G.qw, 4)
-    # 
-    # #heatmap(G.w)
-    # 
-    # #fix symmetry
-    # for(i in 1:dim(G.qw)[1]){
-    #   for(j in 1:i){
-    #     G.qw[j,i] = G.qw[i,j]
-    #   }
-    # }
-    # is.positive.definite(G.qw)
+    
+    #round
+    G = round(G, 5)
 
-    write.table(G, "24CBHqwGRM.txt", sep = " ",
+    #heatmap(G.w)
+
+    #fix symmetry
+    for(i in 1:dim(G)[1]){
+      for(j in 1:i){
+        G[j,i] = G[i,j]
+      }
+    }
+    is.positive.definite(G)
+    
+    #test for weird individuals
+    #hist(colMeans(G))
+
+    write.table(G, "CBH-GRM-AP.txt", sep = " ",
                 quote = F)
 
 
@@ -289,6 +295,9 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     hist(diag(G))
     hist(diag(G)[grepl("_w", colnames(G))])
     hist(diag(G)[!grepl("_w", colnames(G))])
+    
+    qdiag = diag(G)[!grepl("_w", colnames(G))]
+    qdiag[qdiag>1.5]
     
     G.q = G[!grepl("_w", colnames(G)), !grepl("_w", colnames(G))]
     
@@ -307,9 +316,12 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
     #G.q["23CBHII96.x", "23CBHII96.y"]
     
     #load pedigree
-    ped = read.csv("fullpedigree.csv")
+    ped = read.csv("pedigree_edit_15DEC25.csv")
     
-    testgroup = ped$queen_id[ped$mother%in% c("23_065")]
+    ped %>% filter(yob == 2024, !grepl("_p", mother)) %>% 
+      select(mother) %>% table()
+    
+    testgroup = ped$queen_id[ped$mother%in% c("23_193")]
       testgroup = testgroup[!grepl("p", testgroup)]
       testgroup = gsub("_", "CBH", testgroup)
       testgroup = testgroup[testgroup %in% colnames(G.q)]
@@ -323,16 +335,10 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
       mean(G.q[upper.tri(G.q, diag = F)])
       
       heatmap(G.test)
+      
+      #closer to pedigree expectation with AlphaPeel AF, 
+        #although still under-estimated...
     
-  
-#write out...
-  
-
-    
-  
-  
-  
-  
   
     
     #OLD pileup code
