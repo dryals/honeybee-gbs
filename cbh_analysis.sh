@@ -293,7 +293,7 @@ chrsShort=$( awk '{print $2}' $rename | tr '\n' ' ' )
         #compare against naive afs
         cd ..
     bcftools view 23CBH-ap.vcf | bcftools +fill-tags | \
-        bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH-ap.frq
+        bcftools query -f'%CHROM\t%POS\t%AF\n' -o 23CBH-naive.frq
         
         
         
