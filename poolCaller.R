@@ -5,7 +5,9 @@ library(AGHmatrix)
 
 #Dylan Ryals 25 AUG 2025
 
-#laste edit: 26 AUG 2025
+#last edit: 26 DEC 2025
+  
+  #re-doing with AlphaPeel allele frequencies
 
 #TODO:
   #edit to accept a filename argument or hardcode a filename...
@@ -13,7 +15,7 @@ library(AGHmatrix)
 
 setwd("/scratch/negishi/dryals/gbs/24CBH/analysis")
 
-sync = read.delim("24CBH.sync", sep = "", header = F)
+sync = read.delim("chrPar/24CBH-ap.sync", sep = "", header = F)
 #sync = read.delim("data/test4.sync", sep = "", header = F)
 
 #sample names
@@ -79,9 +81,10 @@ sampnames = read.delim("24CBHpool.bamlist", header = F)
 #     frq0 = sapply(1:100, MLE)
 #     
 #     plot(frq[1:100], frq0)
-
-    frq = rowSums(samples.ref) / rowSums(samples.depth)
+# 
+#     frq = rowSums(samples.ref) / rowSums(samples.depth)
     
+  frq = read.delim()
     
     allchrs = unique(sync.c)
     
