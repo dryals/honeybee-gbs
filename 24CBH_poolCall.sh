@@ -97,16 +97,26 @@ module load biocontainers samtools bcftools
     
     #START PARALLEL
     
+#cat all files
+cd /scratch/negishi/dryals/gbs/24CBH/analysis/chrPar
+for i in {1..16}
+do
+    cat chr${i}/24CBH-ap_chr${i}.mpileup >> 24CBH-ap.mpileup
 
+done
 
 
 #ON LOCAL MACHINE
 
+    cd /home/dylan/Documents/bees/harpurlab/project/honeybee-gbs/data
+
     PPP=/home/dylan/Documents/bees/harpurlab/project/gensel/poPoolation2/popoolation2_1201
 
     java -ea -Xmx7g -jar $PPP/mpileup2sync.jar \
-    --input 24CBH.mpileup --output 24CBH.sync \
+    --input 24CBH-ap.mpileup --output 24CBH-ap.sync \
     --fastq-type sanger --min-qual 20 --threads 8
+    
+#now on to queencaller.R
 
     
 ######
